@@ -23,7 +23,7 @@ import { useState } from "react";
 
 type Props = { value: string; onChange: (value: string) => void };
 
-const DebitAccountSelector = ({ value, onChange }: Props) => {
+const CreditAccountSelector = ({ value, onChange }: Props) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const selected = accounts.find((a) => a.code === value);
   const [amount, setAmount] = useState("");
@@ -122,4 +122,4 @@ const DebitAccountSelector = ({ value, onChange }: Props) => {
   );
 };
 
-export default DebitAccountSelector;
+export default CreditAccountSelector;

@@ -17,16 +17,31 @@ import {
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
 import { Account } from "@/types";
-import { Label } from "./ui/label";
 import AmountInput from "./AmountInput";
-import { useState } from "react";
 
-type Props = { value: string; onChange: (value: string) => void };
+type Props = {
+  value: string;
+  onChange: (value: string) => void;
+  amount: string;
+  onAmountChange: (value: string) => void;
+  excludeAccounts?: string[];
+  className?: string;
+};
 
-const DebitAccountSelector = ({ value, onChange }: Props) => {
+const DebitAccountSelector = ({
+  value,
+  onChange,
+  amount,
+  onAmountChange,
+  excludeAccounts = [],
+  className,
+}: Props) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const selected = accounts.find((a) => a.code === value);
-  const [amount, setAmount] = useState("");
+
+  const availableAccounts = accounts.filter(
+    (account) => !excludeAccounts.includes(account.code)
+  );
 
   // Arrumar e entender esse grouped
   const grouped = accounts.reduce<Record<string, Account[]>>((acc, accnt) => {
@@ -39,7 +54,10 @@ const DebitAccountSelector = ({ value, onChange }: Props) => {
     <Button
       variant="outline"
       role="combobox"
-      className="w-full justify-between"
+      className={cn(
+        "w-full justify-between font-normal transition-[width,height]",
+        className
+      )}
     >
       {selected ? selected.codeAndName : "Selecione uma conta"}
       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -86,38 +104,33 @@ const DebitAccountSelector = ({ value, onChange }: Props) => {
     </Command>
   );
 
-  console.log(selected);
-
   // Arrumar opções estourando a tela: faltava <CommandList>
   // Arrumar styling
   if (isDesktop) {
     return (
       <div className="flex gap-2">
         <div className="w-3/4">
-          <Label className="font-semibold mb-1">Débito</Label>
           <Popover>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
-              {commandList}
-            </PopoverContent>
+            <PopoverContent className="grow p-0">{commandList}</PopoverContent>
           </Popover>
         </div>
-        <AmountInput value={amount} onChange={setAmount} />
+        <AmountInput value={amount} onChange={onAmountChange} />
       </div>
     );
   }
 
-  // Arrumar subgrupos cortados no mobile
+  // Arrumar subgrupos cortados no
+  // TODO: arrumar opções ultrapassando o tamanho do componente no mobile
   return (
     <div className="flex flex-row gap-2">
       <div className="w-3/4">
-        <Label className="font-semibold mb-1">Débito</Label>
         <Drawer>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
           <DrawerContent className="p-4">{commandList}</DrawerContent>
         </Drawer>
       </div>
-      <AmountInput value={amount} onChange={setAmount} />
+      <AmountInput value={amount} onChange={onAmountChange} />
     </div>
   );
 };

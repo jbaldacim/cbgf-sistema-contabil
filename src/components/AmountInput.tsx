@@ -1,12 +1,13 @@
+import { useId } from "react";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 
 type Props = { value: string; onChange: (value: string) => void };
 
 const AmountInput = ({ value, onChange }: Props) => {
+  const inputId = useId();
+
   return (
-    <div className="grow">
-      <Label className="font-semibold mb-1">Valor</Label>
+    <div className="w-full">
       <Input
         type="number"
         placeholder="R$ 0,00"
@@ -15,9 +16,10 @@ const AmountInput = ({ value, onChange }: Props) => {
           onChange(e.target.value);
           console.log(e.target.value);
         }}
-        step="0.01"
+        step="any"
         min="0"
         className="bg-background"
+        id={inputId}
       />
     </div>
   );

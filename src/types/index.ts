@@ -16,6 +16,7 @@ export type AccountGroup =
   | "Apuração do Resultado";
 
 export interface JournalEntry {
+  id: string;
   accountId: string;
   amount: number;
   type: "debito" | "credito";

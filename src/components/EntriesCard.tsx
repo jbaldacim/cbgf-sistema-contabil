@@ -17,8 +17,13 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, formatarMoeda } from "@/lib/utils";
 import AccountSelector from "./AccountSelector";
+import { Account } from "@/types";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { v4 as uuid } from "uuid";
+import { normalizeAccounts } from "@/lib/normalizers";
 
 type Entry = {
   id: string;
@@ -38,13 +43,6 @@ interface EntriesCardProps {
   total: number;
 }
 
-const formatarMoeda = (valor: number) => {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-};
-
 export function EntriesCard({
   type,
   title,
@@ -56,6 +54,27 @@ export function EntriesCard({
   isAccountDuplicated,
   total,
 }: EntriesCardProps) {
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  useEffect(() => {
+    async function load() {
+      const { data, error } = await supabase
+        .from("accounts")
+        .select("*")
+        .order("code");
+
+      if (error) {
+        console.error("Erro ao buscar contas:", error.message);
+        return;
+      }
+
+      const normalized = normalizeAccounts(data ?? []);
+
+      setAccounts(normalized);
+    }
+
+    load();
+  }, []);
+
   return (
     <AnimatePresence initial={false} mode="popLayout">
       <motion.div>
@@ -157,6 +176,7 @@ export function EntriesCard({
                           className={cn(duplicated && "border-destructive")}
                           onRemove={() => removeEntry(entry.id)}
                           showRemoveButton={showRemoveButton}
+                          accounts={accounts}
                         />
 
                         <AnimatePresence>

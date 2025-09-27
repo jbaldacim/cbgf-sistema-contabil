@@ -1,10 +1,13 @@
 export interface Account {
+  id: string;
   code: string;
   name: string;
   accountGroup: string;
   subgroup1: string;
   subgroup2: string;
   codeAndName: string;
+  balance: number;
+  history: (Omit<JournalEntry, "accountId"> & { date: Date })[];
 }
 
 export type AccountGroup =
@@ -15,12 +18,12 @@ export type AccountGroup =
   | "Receitas"
   | "Apuração do Resultado";
 
-export interface JournalEntry {
+export type JournalEntry = {
   id: string;
   accountId: string;
   amount: number;
   type: "debito" | "credito";
-}
+};
 
 export interface CompleteTransaction {
   id?: string;

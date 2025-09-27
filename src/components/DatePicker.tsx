@@ -32,30 +32,30 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-export function DatePicker() {
+type Props = { date: Date; onDateChange: (value: Date) => void };
+
+export function DatePicker({date = new Date(), onDateChange}:Props) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date("2025-06-01")
-  );
+  // const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [value, setValue] = React.useState(formatDate(date));
 
   return (
-    <div className="flex flex-col gap-3">
-      <Label htmlFor="date" className="px-1">
-        Subscription Date
+    <div className="flex flex-col p-1">
+      <Label htmlFor="date" className="font-semibold mb-1 px-1">
+        Data
       </Label>
       <div className="relative flex gap-2">
         <Input
           id="date"
           value={value}
-          placeholder="June 01, 2025"
+          placeholder={Date.now().toString()}
           className="bg-background pr-10"
           onChange={(e) => {
             const date = new Date(e.target.value);
             setValue(e.target.value);
             if (isValidDate(date)) {
-              setDate(date);
+              onDateChange(date);
               setMonth(date);
             }
           }}
@@ -74,7 +74,7 @@ export function DatePicker() {
               className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
             >
               <CalendarIcon className="size-3.5" />
-              <span className="sr-only">Select date</span>
+              <span className="sr-only">Selecione a data</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -90,7 +90,7 @@ export function DatePicker() {
               month={month}
               onMonthChange={setMonth}
               onSelect={(date) => {
-                setDate(date);
+                onDateChange(date);
                 setValue(formatDate(date));
                 setOpen(false);
               }}

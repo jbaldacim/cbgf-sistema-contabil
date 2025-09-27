@@ -1,4 +1,5 @@
 import { Account, AccountGroup } from "@/types";
+// Adicionar total e histórico de entradas por conta
 
 export const accounts: Account[] = [
   {
@@ -8,6 +9,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Circulante",
     subgroup2: "",
     codeAndName: "1.0.1 - Caixa",
+    balance: 0,
+    history: [],
   },
   {
     code: "1.0.2",
@@ -16,6 +19,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Circulante",
     subgroup2: "",
     codeAndName: "1.0.2 - Bancos Conta Movimento",
+    balance: 0,
+    history: [],
   },
   {
     code: "1.0.3",
@@ -24,6 +29,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Circulante",
     subgroup2: "",
     codeAndName: "1.0.3 - Clientes",
+    balance: 0,
+    history: [],
   },
   {
     code: "1.0.4",
@@ -32,6 +39,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Circulante",
     subgroup2: "",
     codeAndName: "1.0.4 - Estoques",
+    balance: 0,
+    history: [],
   },
   {
     code: "1.0.5",
@@ -40,6 +49,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Circulante",
     subgroup2: "",
     codeAndName: "1.0.5 - Despesas Antecipadas",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.0.1",
@@ -48,6 +59,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Realizável a Longo Prazo",
     codeAndName: "2.0.1 - Clientes - Longo Prazo",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.0.2",
@@ -56,6 +69,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Realizável a Longo Prazo",
     codeAndName: "2.0.2 - Depósitos Judiciais",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.1.1",
@@ -64,6 +79,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Investimentos",
     codeAndName: "2.1.1 - Participações Societárias",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.1.2",
@@ -72,6 +89,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Investimentos",
     codeAndName: "2.1.2 - Imóveis para Renda",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.2.1",
@@ -80,6 +99,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Imobilizado",
     codeAndName: "2.2.1 - Máquinas e Equipamentos",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.2.2",
@@ -88,6 +109,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Imobilizado",
     codeAndName: "2.2.2 - Veículos",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.2.3",
@@ -96,6 +119,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Imobilizado",
     codeAndName: "2.2.3 - Móveis e Utensílios",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.2.4",
@@ -104,6 +129,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Imobilizado",
     codeAndName: "2.2.4 - Depreciação Acumulada",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.3.1",
@@ -112,6 +139,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Intangível",
     codeAndName: "2.3.1 - Softwares",
+    balance: 0,
+    history: [],
   },
   {
     code: "2.3.2",
@@ -120,6 +149,8 @@ export const accounts: Account[] = [
     subgroup1: "Ativo Não Circulante",
     subgroup2: "Intangível",
     codeAndName: "2.3.2 - Marcas e Patentes",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.0.1",
@@ -128,6 +159,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Circulante",
     subgroup2: "",
     codeAndName: "3.0.1 - Fornecedores",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.0.2",
@@ -136,6 +169,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Circulante",
     subgroup2: "",
     codeAndName: "3.0.2 - Salários a Pagar",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.0.3",
@@ -144,6 +179,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Circulante",
     subgroup2: "",
     codeAndName: "3.0.3 - Impostos a Recolher",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.0.4",
@@ -152,6 +189,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Circulante",
     subgroup2: "",
     codeAndName: "3.0.4 - Empréstimos Bancários CP",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.0.5",
@@ -160,6 +199,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Circulante",
     subgroup2: "",
     codeAndName: "3.0.5 - Contas a Pagar",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.1.1",
@@ -168,6 +209,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Não Circulante",
     subgroup2: "",
     codeAndName: "3.1.1 - Empréstimos Bancários LP",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.1.2",
@@ -176,6 +219,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Não Circulante",
     subgroup2: "",
     codeAndName: "3.1.2 - Provisões Trabalhistas",
+    balance: 0,
+    history: [],
   },
   {
     code: "3.1.3",
@@ -184,6 +229,8 @@ export const accounts: Account[] = [
     subgroup1: "Passivo Não Circulante",
     subgroup2: "",
     codeAndName: "3.1.3 - Contas a Pagar LP",
+    balance: 0,
+    history: [],
   },
   {
     code: "4.0.1",
@@ -192,6 +239,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "4.0.1 - Capital Social",
+    balance: 0,
+    history: [],
   },
   {
     code: "4.0.2",
@@ -200,6 +249,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "4.0.2 - Reservas de Lucros",
+    balance: 0,
+    history: [],
   },
   {
     code: "4.0.3",
@@ -208,6 +259,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "4.0.3 - Lucros Acumulados",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.0.1",
@@ -216,6 +269,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.0.1 - CMV",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.0.2",
@@ -224,6 +279,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.0.2 - CPV",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.0.3",
@@ -232,6 +289,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.0.3 - CSP",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.1.1",
@@ -240,6 +299,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.1.1 - Despesa com Salários",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.1.2",
@@ -248,6 +309,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.1.2 - Despesa com Aluguel",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.1.3",
@@ -256,6 +319,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.1.3 - Despesa com Energia Elétrica",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.1.4",
@@ -264,6 +329,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.1.4 - Despesa Financeira",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.1.5",
@@ -272,6 +339,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.1.5 - Despesa com Material de Escritório",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.2.1",
@@ -280,6 +349,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.2.1 - Despesa com Depreciação",
+    balance: 0,
+    history: [],
   },
   {
     code: "5.3.0",
@@ -288,6 +359,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "5.3.0 - Despesa com IRPJ",
+    balance: 0,
+    history: [],
   },
   {
     code: "6.0.1",
@@ -296,6 +369,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "6.0.1 - Receita de Vendas",
+    balance: 0,
+    history: [],
   },
   {
     code: "6.0.2",
@@ -304,6 +379,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "6.0.2 - Receita de Serviços",
+    balance: 0,
+    history: [],
   },
   {
     code: "6.0.3",
@@ -312,6 +389,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "6.0.3 - Receita Financeira",
+    balance: 0,
+    history: [],
   },
   {
     code: "7.0.1",
@@ -320,6 +399,8 @@ export const accounts: Account[] = [
     subgroup1: "",
     subgroup2: "",
     codeAndName: "7.0.1 - Resultado do Exercício",
+    balance: 0,
+    history: [],
   },
 ];
 

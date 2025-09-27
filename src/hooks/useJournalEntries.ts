@@ -18,6 +18,9 @@ export const useJournalEntries = () => {
     },
   ]);
 
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState(new Date());
+
   // Função para adicionar nova entrada
   const addEntry = (type: "debito" | "credito") => {
     setEntries((prev) => [
@@ -149,22 +152,45 @@ export const useJournalEntries = () => {
       errors.push("Todos os campos de valores devem ser preenchidos");
     }
 
+    const hasDescription = description !== "";
+    if (!hasDescription) {
+      errors.push("Todo lançamento deve ter uma descrição");
+    }
+
     return errors;
-  }, [entries, isBalanced, hasDuplicates, duplicateAccounts, totals]);
+  }, [
+    entries,
+    isBalanced,
+    hasDuplicates,
+    duplicateAccounts,
+    totals,
+    description,
+  ]);
 
   const isFormValid = useMemo(() => {
     const hasAllAccountIds = entries.every(
       (entry) => entry.accountId.trim() !== ""
     );
     const hasValidAmounts = entries.every((entry) => entry.amount > 0);
-    return isBalanced && hasAllAccountIds && hasValidAmounts;
-  }, [entries, isBalanced]);
+    const hasDescription = description !== "";
+    return (
+      isBalanced &&
+      hasAllAccountIds &&
+      hasValidAmounts &&
+      hasDescription &&
+      !hasDuplicates
+    );
+  }, [entries, isBalanced, description]);
 
-  console.log("📊 Estado atual dos entries:", entries);
+  // console.log("📊 Estado atual dos entries:", entries);
 
   return {
     // Estado
     entries,
+    description,
+    setDescription,
+    date,
+    setDate,
 
     // Manipulação
     addEntry,

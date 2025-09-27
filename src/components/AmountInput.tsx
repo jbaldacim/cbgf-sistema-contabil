@@ -14,7 +14,6 @@ const AmountInput = ({ value, onChange }: Props) => {
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
-          console.log(e.target.value);
         }}
         step="any"
         min="0"

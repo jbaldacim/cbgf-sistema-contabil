@@ -1,4 +1,3 @@
-// AccountSelector.tsx
 "use client";
 
 import React from "react";
@@ -6,7 +5,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
-import { accounts } from "@/lib/contas";
 import {
   Command,
   CommandEmpty,
@@ -33,6 +31,7 @@ type Props = {
   onRemove?: () => void;
   /** new: se o botão deve estar habilitado/visível */
   showRemoveButton?: boolean;
+  accounts: Account[];
 };
 
 const AccountSelector = ({
@@ -44,6 +43,7 @@ const AccountSelector = ({
   className,
   onRemove,
   showRemoveButton = true,
+  accounts,
 }: Props) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const selected = accounts.find((a) => a.code === value);
@@ -65,7 +65,9 @@ const AccountSelector = ({
       )}
     >
       <span className="truncate block min-w-0 font-normal">
-        {selected ? selected.codeAndName : "Selecione uma conta"}
+        {selected
+          ? selected.code + " - " + selected.name
+          : "Selecione uma conta"}
       </span>
       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
     </Button>
@@ -93,7 +95,10 @@ const AccountSelector = ({
                   <CommandItem
                     key={account.code}
                     value={account.code}
-                    keywords={[account.name.toLowerCase()]}
+                    keywords={[
+                      account.name.toLowerCase(),
+                      account.accountGroup.toLowerCase(),
+                    ]}
                     onSelect={(val) => onChange(val)}
                   >
                     <Check
@@ -102,7 +107,7 @@ const AccountSelector = ({
                         value === account.code ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    {account.codeAndName}
+                    {account.code + " - " + account.name}
                   </CommandItem>
                 ))}
             </CommandGroup>
@@ -120,7 +125,7 @@ const AccountSelector = ({
         <div className="flex-1 min-w-0">
           <Popover>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="p-0 min-w-0">
+            <PopoverContent className="p-0 min-w-0 popover-content-width-full">
               {commandList}
             </PopoverContent>
           </Popover>
@@ -138,9 +143,10 @@ const AccountSelector = ({
               <span tabIndex={0} className="inline-block w-full">
                 <Button
                   size="icon"
-                  variant="outline"
+                  variant="ghost"
                   className="w-full"
                   onClick={onRemove}
+                  // TODO Ajustar botão inicial sem borda
                   disabled={!showRemoveButton}
                   aria-label="Remover conta"
                 >

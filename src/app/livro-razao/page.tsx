@@ -1,13 +1,47 @@
 "use client";
 import AccountSelector from "@/components/AccountSelector";
 import { getAccountByCode } from "@/lib/contas";
-import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { JournalEntry } from "@/types";
+import { useEffect, useState } from "react";
 // import { useState } from "react";
 
 export default function Home() {
   // const [account, setAccount] = useState("");
-  const account = getAccountByCode("1.0.1");
-  const history = account?.history;
+  const code = "1.0.1";
+  const account = getAccountByCode(code);
+  const [history, setHistory] = useState<JournalEntry[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const { data: account, error: accountError } = await supabase
+        .from("accounts")
+        .select("id")
+        .eq("code", code);
+
+      if (accountError) {
+        console.error("Erro ao buscar contas:", accountError.message);
+        return;
+      }
+
+      const { data: entries, error: entriesError } = await supabase
+        .from("journal_entries")
+        .select("*")
+        .eq("account_id", account?.[0].id)
+        .order("date");
+
+      if (entriesError) {
+        console.error("Erro ao buscar histórico:", entriesError.message);
+        return;
+      }
+
+      setHistory(entries);
+      console.log(entries);
+    }
+
+    load();
+  }, []);
+
   useEffect(() => {
     console.log(history);
     console.log(account);

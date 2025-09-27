@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { cn, formatarMoeda } from "@/lib/utils";
 import { EntriesCard } from "@/components/EntriesCard";
-import { accounts, getAccountByCode } from "@/lib/contas";
 import { supabase } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
 import { normalizeAccounts } from "@/lib/normalizers";
@@ -44,6 +43,7 @@ export default function Home() {
   } = useJournalEntries();
 
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -66,96 +66,43 @@ export default function Home() {
   }, []);
 
   // Fazer modificações de amount e history no banco
-  // FIX: Valor sendo adicionado ao saldo é o total do lançamento e não o que entrou na conta
   const handleSave = async () => {
-    if (isFormValid) {
+    if (!isFormValid || saving) return;
+    setSaving(true);
+
+    try {
       console.log("Salvando", { entries, description, totals, date });
 
-      // Buscar os dados mais recentes do banco e atualizar o estado local
-      const { data: freshAccounts, error: fetchError } = await supabase
-        .from("accounts")
-        .select("*")
-        .order("code");
+      // Monta os lançamentos com debito/credito separados
+      const historyEntries = entries.map((entry) => {
+        const accountId = accounts.find((a) => a.code === entry.accountId)?.id;
+        if (!accountId)
+          throw new Error(`Conta não encontrada: ${entry.accountId}`);
 
-      if (fetchError) {
-        console.error("Erro ao buscar contas atualizadas:", fetchError.message);
-        return;
-      }
-
-      // Normaliza contas
-      const normalizedFreshAccounts = normalizeAccounts(freshAccounts ?? []);
-
-      // Atualiza estado
-      setAccounts(normalizedFreshAccounts);
-
-      const changedAccounts: {
-        id: string;
-        balance: number;
-      }[] = [];
-
-      const historyEntries: {
-        id: string;
-        account_id: string;
-        amount: number;
-        type: "debito" | "credito";
-        date: string;
-      }[] = [];
-
-      entries.forEach((entry) => {
-        const account = normalizedFreshAccounts.find(
-          (account) => account.code === entry.accountId
-        );
-
-        if (!account) return;
-
-        // Atualizar saldo local
-        const newBalance = account.balance + entry.amount;
-
-        changedAccounts.push({
-          id: account.id,
-          balance: newBalance,
-        });
-
-        historyEntries.push({
+        return {
           id: uuid(),
-          account_id: account.id,
-          amount: entry.amount,
-          type: entry.type,
+          account_id: accountId,
+          debito: entry.type === "debito" ? entry.amount : 0,
+          credito: entry.type === "credito" ? entry.amount : 0,
+          description: description,
           date: date.toISOString(),
-        });
-
-        console.log(
-          `Conta: ${account.codeAndName}\nNovo saldo: ${formatarMoeda(
-            newBalance
-          )}`
-        );
+        };
       });
 
-      // Atualizar contas no banco
-      const { error: updateError } = await supabase
-        .from("accounts")
-        .update(changedAccounts.map(({ id, balance }) => ({ balance })))
-        .in(
-          "id",
-          changedAccounts.map(({ id }) => id)
-        );
-
-      if (updateError) {
-        console.error("Erro ao atualizar contas: ", updateError.message);
-        return;
-      }
-
+      // Insere no banco
       const { error: insertError } = await supabase
         .from("journal_entries")
         .insert(historyEntries);
 
-      if (insertError) {
-        console.error("Erro ao inserir histórico: ", insertError.message);
-        return;
-      }
+      if (insertError) throw insertError;
+
+      resetEntries();
 
       console.log("Lançamento salvo com sucesso!");
-      resetEntries();
+    } catch (err: any) {
+      console.error("Erro ao salvar lançamento:", err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -235,7 +182,7 @@ export default function Home() {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!isFormValid}
+            disabled={!isFormValid || saving}
             className="flex-1"
           >
             Salvar Lançamento

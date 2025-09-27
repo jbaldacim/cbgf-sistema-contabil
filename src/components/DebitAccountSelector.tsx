@@ -121,7 +121,6 @@ const DebitAccountSelector = ({
   }
 
   // Arrumar subgrupos cortados no
-  // TODO: arrumar opções ultrapassando o tamanho do componente no mobile
   return (
     <div className="flex flex-row gap-2">
       <div className="w-3/4">

@@ -1,17 +1,18 @@
 import { useMemo, useState } from "react";
 import { JournalEntry } from "@/types";
+import { v4 as uuid } from "uuid";
 
 export const useJournalEntries = () => {
   // Estado para armazenar as entradas
   const [entries, setEntries] = useState<JournalEntry[]>([
     {
-      id: `debito-${Date.now()}-${Math.random()}`,
+      id: uuid(),
       accountId: "",
       amount: 0,
       type: "debito",
     },
     {
-      id: `credito-${Date.now()}-${Math.random()}`,
+      id: uuid(),
       accountId: "",
       amount: 0,
       type: "credito",
@@ -26,7 +27,7 @@ export const useJournalEntries = () => {
     setEntries((prev) => [
       ...prev,
       {
-        id: `${type}-${Date.now()}-${Math.random()}`,
+        id: uuid(),
         accountId: "",
         amount: 0,
         type: type,
@@ -58,7 +59,7 @@ export const useJournalEntries = () => {
   const resetEntries = () => {
     setEntries([
       {
-        id: `debito-${Date.now()}-${Math.random()}`,
+        id: uuid(),
         accountId: "",
         amount: 0,
         type: "debito",

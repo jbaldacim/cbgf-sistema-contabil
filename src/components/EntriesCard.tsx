@@ -22,7 +22,6 @@ import AccountSelector from "./AccountSelector";
 import { Account } from "@/types";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { v4 as uuid } from "uuid";
 import { normalizeAccounts } from "@/lib/normalizers";
 
 type Entry = {

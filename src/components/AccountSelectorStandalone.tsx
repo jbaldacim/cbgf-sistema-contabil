@@ -15,8 +15,9 @@ import {
   CommandSeparator,
 } from "./ui/command";
 import { cn } from "@/lib/utils";
-import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from "./ui/drawer";
 import type { Account } from "@/types";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 type Props = {
   value: string;
@@ -110,7 +111,7 @@ const AccountSelectorStandalone = ({
       <Popover>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
         <PopoverContent className="p-0 min-w-0 popover-content-width-full">
-          {commandList}
+          <PopoverClose asChild>{commandList}</PopoverClose>
         </PopoverContent>
       </Popover>
     );
@@ -119,7 +120,9 @@ const AccountSelectorStandalone = ({
   return (
     <Drawer>
       <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-      <DrawerContent className="p-4 min-w-0">{commandList}</DrawerContent>
+      <DrawerContent className="p-4 min-w-0">
+        <DrawerClose asChild>{commandList}</DrawerClose>
+      </DrawerContent>
     </Drawer>
   );
 };

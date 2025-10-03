@@ -1,23 +1,23 @@
 "use client";
-import AccountSelectorStandalone from "@/components/AccountSelectorStandalone";
 import { normalizeAccounts } from "@/lib/normalizers";
 import { supabase } from "@/lib/supabaseClient";
-import { formatarMoeda } from "@/lib/utils";
-import { Account } from "@/types";
+import type { Account } from "@/types";
 import { useEffect, useState } from "react";
-
-import { columns, Entry } from "@/components/Columns";
+import { columns } from "@/components/Columns-LivroRazao";
 import { DataTable } from "@/components/Data-Table";
+import { BookMarked, Loader2 } from "lucide-react";
 
-export default function Home() {
-  // const [account, setAccount] = useState("");
+export default function LivroRazao() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [code, setCode] = useState("1.0.1");
   const [history, setHistory] = useState<any[]>([]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const isLoading = isLoadingAccounts || isLoadingHistory;
 
   useEffect(() => {
-    // Carrega contas apenas no mount
     async function loadAccounts() {
+      setIsLoadingAccounts(true);
       const { data, error } = await supabase
         .from("accounts")
         .select("*")
@@ -30,16 +30,18 @@ export default function Home() {
 
       const normalized = normalizeAccounts(data ?? []);
       setAccounts(normalized);
+      setIsLoadingAccounts(false);
     }
 
     loadAccounts();
   }, []);
 
   useEffect(() => {
-    // Carrega histórico sempre que 'code' muda
     async function loadHistory() {
       const account = accounts.find((a) => a.code === code);
       if (!account) return;
+
+      setIsLoadingHistory(true);
 
       const { data: entries, error } = await supabase
         .from("journal_entries")
@@ -53,32 +55,51 @@ export default function Home() {
       }
 
       setHistory(entries ?? []);
+      setIsLoadingHistory(false);
     }
 
     loadHistory();
   }, [code, accounts]);
 
   return (
-    <main className="min-h-screen max-w-screen flex justify-center items-start gap-6 bg-muted p-6">
-      <article className="flex flex-col justify-center w-full">
-        <h1 className="text-center font-bold text-4xl">Livro Razão</h1>
-        {/* <div className="flex items-center justify-center">
-          <div className="w-[400px]">
-            <AccountSelectorStandalone
-              value={code}
-              onChange={setCode}
-              accounts={accounts}
-            />
+    <main className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
+      <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 py-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+              <BookMarked className="text-primary h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-foreground text-3xl font-bold tracking-tight">
+                Livro Razão
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Histórico detalhado por conta contábil
+              </p>
+            </div>
           </div>
-        </div> */}
-        <DataTable
-          columns={columns}
-          data={history}
-          code={code}
-          setCode={setCode}
-          accounts={accounts}
-        />
-      </article>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        {isLoading ? (
+          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-xl border shadow-sm">
+            <div className="text-muted-foreground flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <p className="text-sm font-medium">Carregando dados...</p>
+            </div>
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={history}
+            code={code}
+            setCode={setCode}
+            accounts={accounts}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
     </main>
   );
 }

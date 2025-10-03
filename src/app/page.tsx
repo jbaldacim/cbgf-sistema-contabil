@@ -13,73 +13,89 @@ import { v4 as uuid } from "uuid";
 import {
   CheckCircle2,
   AlertCircle,
+  PenSquare,
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Home() {
   const {
-    // Estado
     entries,
     description,
     setDescription,
     date,
     setDate,
-
-    // Manipulação
     addEntry,
     removeEntry,
     updateEntry,
     resetEntries,
-
-    // Listas filtradas
     debitEntries,
     creditEntries,
-
-    // Valores computados
     totals,
     isBalanced,
     isFormValid,
-
-    // Validação
-    hasDuplicates,
-    duplicateAccounts,
-    isAccountDuplicated,
     validationErrors,
+    isAccountDuplicated,
   } = useJournalEntries();
 
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [saving, setSaving] = useState(false);
+  // **NOVO ESTADO PARA ARMAZENAR O ID DO USUÁRIO**
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
-      const { data, error } = await supabase
+    async function loadInitialData() {
+      // **1. BUSCA O USUÁRIO LOGADO**
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      } else {
+        // Lida com o caso em que não há usuário (embora o AuthGuard deva prevenir isso)
+        toast.error("Usuário não autenticado.");
+        return;
+      }
+
+      // **2. BUSCA AS CONTAS DO USUÁRIO (A SEGURANÇA RLS FILTRA AUTOMATICAMENTE)**
+      const { data: accountData, error } = await supabase
         .from("accounts")
         .select("*")
         .order("code");
 
       if (error) {
         console.error("Erro ao buscar contas:", error.message);
+        toast.error("Não foi possível carregar as contas");
         return;
       }
 
-      const normalized = normalizeAccounts(data ?? []);
-
+      const normalized = normalizeAccounts(accountData ?? []);
       setAccounts(normalized);
     }
 
-    load();
+    loadInitialData();
   }, []);
 
-  // Fazer modificações de amount e history no banco
   const handleSave = async () => {
-    if (!isFormValid || saving) return;
+    // Garante que temos o ID do usuário antes de salvar
+    if (!isFormValid || saving || !userId) return;
     setSaving(true);
 
     try {
-      console.log("Salvando", { entries, description, totals, date });
+      // **3. ENVIA O USER_ID AO CRIAR A TRANSAÇÃO**
+      // O campo transaction_number é omitido, pois o banco de dados cuidará disso.
+      const { data: transaction, error: transError } = await supabase
+        .from("transactions")
+        .insert({ user_id: userId }) // **MUDANÇA ESSENCIAL AQUI**
+        .select()
+        .single();
 
-      // Monta os lançamentos com debito/credito separados
+      if (transError) throw transError;
+
+      const transactionId = transaction.id;
+      const transactionNumber = transaction.transaction_number;
+
       const historyEntries = entries.map((entry) => {
         const accountId = accounts.find((a) => a.code === entry.accountId)?.id;
         if (!accountId)
@@ -88,6 +104,7 @@ export default function Home() {
         return {
           id: uuid(),
           account_id: accountId,
+          transaction_id: transactionId,
           debito: entry.type === "debito" ? entry.amount : 0,
           credito: entry.type === "credito" ? entry.amount : 0,
           description: description,
@@ -95,75 +112,65 @@ export default function Home() {
         };
       });
 
-      // Insere no banco
       const { error: insertError } = await supabase
         .from("journal_entries")
         .insert(historyEntries);
 
       if (insertError) throw insertError;
 
+      toast.success(`Transação #${transactionNumber} salva com sucesso!`);
       resetEntries();
-
-      console.log("Lançamento salvo com sucesso!");
     } catch (err: any) {
       console.error("Erro ao salvar lançamento:", err.message);
+      toast.error("Não foi possível salvar o lançamento");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Modern header with better typography and spacing */}
-      <div className="bg-card/50 backdrop-blur-sm border-b border-border/50 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+    <div className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
+      {/* Header */}
+      <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                Lançamentos Contábeis
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie débitos e créditos com precisão
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                <PenSquare className="text-primary h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-foreground text-3xl font-bold tracking-tight">
+                  Lançamentos Contábeis
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Registre débitos e créditos com precisão
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm text-muted-foreground">Status</div>
-                <div
-                  className={cn(
-                    "flex items-center gap-2 text-sm font-medium",
-                    isBalanced ? "text-success" : "text-destructive"
-                  )}
-                >
-                  {isBalanced ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4" />
-                  )}
-                  {isBalanced ? "Balanceado" : "Não Balanceado"}
-                </div>
+            <div className="text-right">
+              <div className="text-muted-foreground text-sm">Status</div>
+              <div
+                className={cn(
+                  "flex items-center justify-end gap-2 text-sm font-medium",
+                  isBalanced ? "text-green-600" : "text-destructive",
+                )}
+              >
+                {isBalanced ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
+                {isBalanced ? "Balanceado" : "Não Balanceado"}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      {/* Content */}
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <TrendingDown className="h-5 w-5 text-destructive" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Débitos
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Contas a debitar • {formatarMoeda(totals.totalDebit)}
-                </p>
-              </div>
-            </div>
             <EntriesCard
               type="debito"
               title="Débito"
@@ -178,19 +185,6 @@ export default function Home() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-success/10">
-                <TrendingUp className="h-5 w-5 text-success" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Créditos
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Contas a creditar • {formatarMoeda(totals.totalCredit)}
-                </p>
-              </div>
-            </div>
             <EntriesCard
               type="credito"
               title="Crédito"
@@ -215,37 +209,32 @@ export default function Home() {
 
           <Card
             className={cn(
-              "glass-effect transition-all duration-300",
+              "border-border transition-all duration-300",
               isBalanced
-                ? "border-success/30 shadow-success/5"
-                : "border-destructive/30 shadow-destructive/5"
+                ? "border-green-600/30 shadow-green-600/5"
+                : "border-destructive/30 shadow-destructive/5",
             )}
           >
-            <CardHeader
-              className={cn(
-                "balance-indicator rounded-t-xl transition-all duration-500",
-                isBalanced
-                  ? "bg-gradient-to-r from-success/10 via-success/5 to-success/10 balanced"
-                  : "bg-gradient-to-r from-destructive/10 via-destructive/5 to-destructive/10"
-              )}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <CardHeader className="bg-muted/50 rounded-t-xl py-6">
+              <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-3">
                 <div className="text-center md:text-left">
-                  <div className="text-sm font-medium text-muted-foreground mb-1">
+                  <div className="text-muted-foreground mb-1 text-sm font-medium">
                     Total Débitos
                   </div>
-                  <div className="text-2xl font-bold text-destructive">
-                    {formatarMoeda(totals.totalDebit)}
+                  <div className="flex items-center justify-center gap-2 md:justify-start">
+                    <div className="text-foreground text-2xl font-bold tabular-nums">
+                      {formatarMoeda(totals.totalDebit)}
+                    </div>
                   </div>
                 </div>
 
                 <div className="text-center">
                   <div
                     className={cn(
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                      "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
                       isBalanced
-                        ? "bg-success/20 text-success border border-success/30"
-                        : "bg-destructive/20 text-destructive border border-destructive/30"
+                        ? "border border-green-600/30 bg-green-600/20 text-green-600"
+                        : "border-destructive/30 bg-destructive/20 text-destructive border",
                     )}
                   >
                     {isBalanced ? (
@@ -257,20 +246,22 @@ export default function Home() {
                       ? "Lançamento Balanceado"
                       : "Lançamento Não Balanceado"}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2">
+                  <div className="text-muted-foreground mt-2 text-xs">
                     Diferença:{" "}
                     {formatarMoeda(
-                      Math.abs(totals.totalDebit - totals.totalCredit)
+                      Math.abs(totals.totalDebit - totals.totalCredit),
                     )}
                   </div>
                 </div>
 
                 <div className="text-center md:text-right">
-                  <div className="text-sm font-medium text-muted-foreground mb-1">
+                  <div className="text-muted-foreground mb-1 text-sm font-medium">
                     Total Créditos
                   </div>
-                  <div className="text-2xl font-bold text-success">
-                    {formatarMoeda(totals.totalCredit)}
+                  <div className="flex items-center justify-center gap-2 md:justify-end">
+                    <div className="text-foreground text-2xl font-bold tabular-nums">
+                      {formatarMoeda(totals.totalCredit)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -278,10 +269,10 @@ export default function Home() {
 
             {validationErrors.length > 0 && (
               <CardContent className="pt-6">
-                <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertCircle className="h-4 w-4 text-destructive" />
-                    <h4 className="font-medium text-destructive">
+                <div className="border-destructive/20 bg-destructive/5 rounded-lg border p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <AlertCircle className="text-destructive h-4 w-4" />
+                    <h4 className="text-destructive font-medium">
                       Problemas encontrados
                     </h4>
                   </div>
@@ -289,7 +280,7 @@ export default function Home() {
                     {validationErrors.map((error, index) => (
                       <li
                         key={index}
-                        className="text-sm text-destructive flex items-start gap-2"
+                        className="text-destructive flex items-start gap-2 text-sm"
                       >
                         <span className="text-destructive/60 mt-1">•</span>
                         <span>{error}</span>
@@ -301,11 +292,11 @@ export default function Home() {
             )}
           </Card>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <Button
               variant="outline"
               onClick={resetEntries}
-              className="flex-1 h-12 text-base font-medium hover:bg-muted/50 transition-all duration-200 bg-transparent"
+              className="hover:bg-muted/50 h-12 flex-1 bg-transparent text-base font-medium transition-all duration-200"
             >
               Limpar Formulário
             </Button>
@@ -313,10 +304,10 @@ export default function Home() {
               onClick={handleSave}
               disabled={!isFormValid || saving}
               className={cn(
-                "flex-1 h-12 text-base font-medium transition-all duration-200",
-                isFormValid
+                "h-12 flex-1 text-base font-medium transition-all duration-200",
+                isFormValid && !saving
                   ? "bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl"
-                  : "opacity-50 cursor-not-allowed"
+                  : "cursor-not-allowed opacity-50",
               )}
             >
               {saving ? "Salvando..." : "Salvar Lançamento"}

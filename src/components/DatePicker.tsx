@@ -1,3 +1,4 @@
+// TODO Traduzir dias do mês
 "use client";
 
 import * as React from "react";
@@ -34,7 +35,7 @@ function isValidDate(date: Date | undefined) {
 
 type Props = { date: Date; onDateChange: (value: Date) => void };
 
-export function DatePicker({date = new Date(), onDateChange}:Props) {
+export function DatePicker({ date = new Date(), onDateChange }: Props) {
   const [open, setOpen] = React.useState(false);
   // const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [month, setMonth] = React.useState<Date | undefined>(date);
@@ -42,7 +43,7 @@ export function DatePicker({date = new Date(), onDateChange}:Props) {
 
   return (
     <div className="flex flex-col p-1">
-      <Label htmlFor="date" className="font-semibold mb-1 px-1">
+      <Label htmlFor="date" className="mb-1 px-1 font-semibold">
         Data
       </Label>
       <div className="relative flex gap-2">

@@ -16,7 +16,7 @@ import {
 } from "./ui/command";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
-import { Account } from "@/types";
+import type { Account } from "@/types";
 import AmountInput from "./AmountInput";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 
@@ -59,12 +59,11 @@ const AccountSelector = ({
       variant="outline"
       role="combobox"
       className={cn(
-        // ocupa todo o espaço disponível na coluna esquerda; truncate evita que cresça
-        "w-full flex items-center justify-between gap-2 min-w-0",
-        className
+        "hover:bg-background flex w-full min-w-0 items-center justify-between gap-2",
+        className,
       )}
     >
-      <span className="truncate block min-w-0 font-normal">
+      <span className="block min-w-0 truncate font-normal">
         {selected
           ? selected.code + " - " + selected.name
           : "Selecione uma conta"}
@@ -104,7 +103,7 @@ const AccountSelector = ({
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === account.code ? "opacity-100" : "opacity-0"
+                        value === account.code ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {account.code + " - " + account.name}
@@ -121,36 +120,33 @@ const AccountSelector = ({
   if (isDesktop) {
     return (
       // layout: [ trigger (flex-1) | amount (fixed) | remove (fixed) ]
-      <div className="flex flex-1 gap-2 items-center min-w-0">
-        <div className="flex-1 min-w-0">
+      <div className="flex w-full items-center gap-3">
+        <div className="min-w-0 flex-1">
           <Popover>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="p-0 min-w-0 popover-content-width-full">
+            <PopoverContent className="popover-content-width-full min-w-0 p-0">
               {commandList}
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* largura fixa para amount — evita que amount mude de tamanho */}
-        <div className="flex-shrink-0 min-w-0 w-20">
+        <div className="w-32 flex-shrink-0">
           <AmountInput value={amount} onChange={onAmountChange} />
         </div>
 
-        {/* remove button dentro do mesmo componente, largura fixa */}
-        <div className="flex-shrink-0 min-w-0 w-10">
+        <div className="flex-shrink-0">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span tabIndex={0} className="inline-block w-full">
+              <span tabIndex={showRemoveButton ? 0 : -1}>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="w-full"
                   onClick={onRemove}
-                  // TODO Ajustar botão inicial sem borda
                   disabled={!showRemoveButton}
                   aria-label="Remover conta"
+                  className="hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <Trash2 className="size-4 text-destructive" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </span>
             </TooltipTrigger>
@@ -158,9 +154,9 @@ const AccountSelector = ({
               {showRemoveButton ? (
                 "Remover conta"
               ) : (
-                <div className="text-center">
-                  Impossível remover conta: pelo menos uma conta de débito
-                  <br></br> e uma de crédito devem ser selecionadas
+                <div className="max-w-xs text-center text-xs">
+                  Impossível remover conta: pelo menos uma conta de débito e uma
+                  de crédito devem ser selecionadas
                 </div>
               )}
             </TooltipContent>
@@ -171,37 +167,91 @@ const AccountSelector = ({
   }
 
   // mobile: trigger (flex-1) | amount (fixed) | remove (fixed)
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
   return (
-    <div className="flex flex-1 gap-2 items-center min-w-0">
-      <div className="flex-1 min-w-0">
-        <Drawer>
-          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="p-4 min-w-0">{commandList}</DrawerContent>
+    <div className="flex w-full items-center gap-3">
+      <div className="min-w-0 flex-1">
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <DrawerTrigger asChild onClick={() => setIsDrawerOpen(true)}>
+            {triggerButton}
+          </DrawerTrigger>
+          <DrawerContent className="min-w-0 p-4">
+            <Command
+              filter={(value, search, keywords) => {
+                const extendedValue = value + " " + keywords?.join(" ");
+                return extendedValue
+                  .toLowerCase()
+                  .includes(search.toLowerCase())
+                  ? 1
+                  : 0;
+              }}
+            >
+              <CommandInput placeholder="Buscar conta..." />
+              <CommandList>
+                <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>
+
+                {Object.entries(grouped).map(([group, items]) => (
+                  <React.Fragment key={group}>
+                    <CommandGroup heading={group}>
+                      {items
+                        .filter((a) => !excludeAccounts.includes(a.code))
+                        .map((account) => (
+                          <CommandItem
+                            key={account.code}
+                            value={account.code}
+                            keywords={[
+                              account.name.toLowerCase(),
+                              account.accountGroup.toLowerCase(),
+                            ]}
+                            onSelect={(val) => {
+                              onChange(val);
+                              setIsDrawerOpen(false); // Fecha o Drawer ao selecionar
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                value === account.code
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            {account.code + " - " + account.name}
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                    <CommandSeparator />
+                  </React.Fragment>
+                ))}
+              </CommandList>
+            </Command>
+          </DrawerContent>
         </Drawer>
       </div>
 
-      <div className="flex-shrink-0 min-w-0 w-20">
+      <div className="w-32 flex-shrink-0">
         <AmountInput value={amount} onChange={onAmountChange} />
       </div>
 
-      <div className="flex-shrink-0 min-w-0 w-10">
+      <div className="flex-shrink-0">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span tabIndex={0} className="inline-block w-full">
+            <span tabIndex={showRemoveButton ? 0 : -1}>
               <Button
                 size="icon"
                 variant="ghost"
-                className="w-full"
                 onClick={onRemove}
                 disabled={!showRemoveButton}
                 aria-label="Remover conta"
+                className="hover:bg-destructive/10 hover:text-destructive"
               >
-                <Trash2 className="size-4 text-destructive" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p>
+            <p className="text-xs">
               {showRemoveButton ? "Remover conta" : "Impossível remover conta"}
             </p>
           </TooltipContent>

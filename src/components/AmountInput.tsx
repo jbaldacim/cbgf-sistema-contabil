@@ -1,3 +1,5 @@
+"use client";
+
 import { useId } from "react";
 import { Input } from "./ui/input";
 
@@ -7,18 +9,22 @@ const AmountInput = ({ value, onChange }: Props) => {
   const inputId = useId();
 
   return (
-    <div className="w-full">
+    <div className="relative w-full">
+      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium">
+        R$
+      </span>
       <Input
         type="number"
-        placeholder="R$ 0,00"
+        placeholder="0,00"
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
         }}
-        step="any"
+        step="0.01"
         min="0"
-        className="bg-background"
+        className="bg-background pl-10 tabular-nums"
         id={inputId}
+        aria-label="Valor em reais"
       />
     </div>
   );

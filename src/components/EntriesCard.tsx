@@ -78,8 +78,8 @@ export function EntriesCard({
     <AnimatePresence initial={false} mode="popLayout">
       <motion.div>
         <Card>
-          <CardHeader className="bg-zinc-300 -mt-6 rounded-t-xl py-4">
-            <CardTitle>{title}</CardTitle>
+          <CardHeader className="bg-accent -mt-6 rounded-t-xl py-4">
+            <CardTitle className="text-lg">{title}</CardTitle>
             <CardDescription className="text-zinc-800">
               {description}
             </CardDescription>
@@ -129,10 +129,10 @@ export function EntriesCard({
                       ease: "easeInOut",
                       layout: { duration: 0.3, ease: "easeInOut" },
                     }}
-                    className="flex flex-col gap-2 items-start overflow-hidden"
+                    className="flex flex-col items-start gap-2 overflow-hidden"
                   >
                     {/* Aqui o motion.div engloba AccountSelector + Remove Button */}
-                    <div className="p-1 flex w-full">
+                    <div className="flex w-full flex-col p-1">
                       <motion.div
                         layout
                         initial={{
@@ -157,7 +157,7 @@ export function EntriesCard({
                           transition: { duration: 0.3, ease: "easeInOut" },
                         }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="flex w-full gap-2 items-start flex-1"
+                        className="flex w-full flex-1 items-start gap-2"
                       >
                         <AccountSelector
                           value={entry.accountId}
@@ -169,7 +169,7 @@ export function EntriesCard({
                             updateEntry(
                               entry.id,
                               "amount",
-                              parseFloat(value) || 0
+                              parseFloat(value) || 0,
                             )
                           }
                           className={cn(duplicated && "border-destructive")}
@@ -177,40 +177,39 @@ export function EntriesCard({
                           showRemoveButton={showRemoveButton}
                           accounts={accounts}
                         />
-
-                        <AnimatePresence>
-                          {duplicated && entry.accountId && (
-                            <motion.p
-                              initial={{
-                                opacity: 0,
-                                height: 0,
-                                y: -10,
-                              }}
-                              animate={{
-                                opacity: 1,
-                                height: "auto",
-                                y: 0,
-                              }}
-                              exit={{
-                                opacity: 0,
-                                height: 0,
-                                y: -10,
-                              }}
-                              transition={{ duration: 0.2, ease: "easeInOut" }}
-                              className="text-destructive text-xs -mt-2 px-1 absolute left-2 -top-0 bg-white"
-                              role="alert"
-                            >
-                              Conta duplicada
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
                       </motion.div>
+                      <AnimatePresence>
+                        {duplicated && entry.accountId && (
+                          <motion.p
+                            initial={{
+                              opacity: 0,
+                              height: 0,
+                              y: -10,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              height: "auto",
+                              y: 0,
+                            }}
+                            exit={{
+                              opacity: 0,
+                              height: 0,
+                              y: -10,
+                            }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="text-destructive mt-px px-2 text-xs"
+                            role="alert"
+                          >
+                            Conta duplicada
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
-            <p className="border-t font-semibold text-end justify-end mt-2 pt-2">
+            <p className="mt-2 justify-end border-t pt-2 text-end font-semibold">
               Total: {formatarMoeda(total)}
             </p>
           </CardContent>

@@ -1,10 +1,10 @@
 # To do
 
-- [ ] Implementar Livro Diário
-- [ ] Implementar Balanço Patrimonial
-- [ ] Deleção de entradas pelo livro diário (com actions na data-table)
-- [ ] Adição e Deleção de Contas
-- [ ] Floating Action Button
+- [x] Implementar Livro Diário
+- [x] Implementar Balanço Patrimonial
+- [x] Deleção de entradas pelo livro diário (com actions na data-table)
+- [x] Adição e Deleção de Contas
+<!-- - [ ] Floating Action Button -->
 - [ ] Adicionar Autenticação
 - [ ] Descobrir como inserir contas por usuário
 

@@ -50,14 +50,15 @@ const AccountSelectorStandalone = ({
       variant="outline"
       role="combobox"
       className={cn(
-        "w-full flex items-center justify-between gap-2 min-w-0",
-        className
+        "flex w-full min-w-0 items-center justify-between gap-2 font-normal",
+        !selected && "text-muted-foreground",
+        className,
       )}
     >
-      <span className="truncate block min-w-0 font-normal">
-        {selected ? selected.code + " - " + selected.name : placeholder}
+      <span className="block min-w-0 truncate">
+        {selected ? `${selected.code} - ${selected.name}` : placeholder}
       </span>
-      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+      <ChevronsUpDown className="ml-2 h-4 w-4 flex-shrink-0 opacity-50" />
     </Button>
   );
 
@@ -92,7 +93,7 @@ const AccountSelectorStandalone = ({
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === account.code ? "opacity-100" : "opacity-0"
+                        value === account.code ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {account.code + " - " + account.name}
@@ -110,7 +111,7 @@ const AccountSelectorStandalone = ({
     return (
       <Popover>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-        <PopoverContent className="p-0 min-w-0 popover-content-width-full">
+        <PopoverContent className="popover-content-width-full min-w-0 p-0">
           <PopoverClose asChild>{commandList}</PopoverClose>
         </PopoverContent>
       </Popover>
@@ -120,7 +121,7 @@ const AccountSelectorStandalone = ({
   return (
     <Drawer>
       <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-      <DrawerContent className="p-4 min-w-0">
+      <DrawerContent className="min-w-0 p-4">
         <DrawerClose asChild>{commandList}</DrawerClose>
       </DrawerContent>
     </Drawer>

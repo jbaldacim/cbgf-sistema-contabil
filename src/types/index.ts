@@ -47,3 +47,40 @@ export interface TransactionFormData {
     amount: number;
   }>;
 }
+
+export type BalanceSheetSection = {
+  title: string;
+  accounts: {
+    code: string;
+    name: string;
+    balance: number;
+  }[];
+  total: number;
+};
+
+export type BalanceSheet = {
+  date: Date;
+  ativo: {
+    circulante: BalanceSheetSection;
+    naoCirculante: {
+      realizavelLongoPrazo: BalanceSheetSection;
+      investimentos: BalanceSheetSection;
+      imobilizado: BalanceSheetSection;
+      intangivel: BalanceSheetSection;
+    };
+    total: number;
+  };
+  passivo: {
+    circulante: BalanceSheetSection;
+    naoCirculante: BalanceSheetSection;
+    total: number;
+  };
+  patrimonioLiquido: {
+    accounts: {
+      code: string;
+      name: string;
+      balance: number;
+    }[];
+    total: number;
+  };
+};

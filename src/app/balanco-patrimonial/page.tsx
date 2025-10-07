@@ -20,10 +20,48 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+// 1. DEFINIÇÃO DOS TIPOS PARA O BALANÇO PATRIMONIAL
+interface BalanceSheetAccount {
+  code: string;
+  name: string;
+  balance: number;
+}
+
+interface BalanceSheetSection {
+  accounts: BalanceSheetAccount[];
+  total: number;
+}
+
+interface AtivoNaoCirculante {
+  realizavelLongoPrazo: BalanceSheetSection;
+  investimentos: BalanceSheetSection;
+  imobilizado: BalanceSheetSection;
+  intangivel: BalanceSheetSection;
+}
+
+interface Ativo {
+  circulante: BalanceSheetSection;
+  naoCirculante: AtivoNaoCirculante;
+  total: number;
+}
+
+interface Passivo {
+  circulante: BalanceSheetSection;
+  naoCirculante: BalanceSheetSection;
+  total: number;
+}
+
+interface BalanceSheet {
+  ativo: Ativo;
+  passivo: Passivo;
+  patrimonioLiquido: BalanceSheetSection;
+}
+
 export default function BalancoPatrimonial() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [balanceSheet, setBalanceSheet] = useState<any>(null);
+  // 2. APLICAÇÃO DO TIPO CORRETO NO ESTADO
+  const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 0, 1),
     to: new Date(),
@@ -137,13 +175,15 @@ export default function BalancoPatrimonial() {
     label,
     value,
     bold = false,
+    className = "",
   }: {
     label: string;
     value: number;
     bold?: boolean;
+    className?: string;
   }) => (
     <div
-      className={`border-border mt-3 flex justify-between border-t pt-3 ${
+      className={`border-border mt-3 flex justify-between border-t pt-3 ${className} ${
         bold ? "text-base font-bold" : "font-semibold"
       }`}
     >
@@ -154,7 +194,7 @@ export default function BalancoPatrimonial() {
 
   return (
     <main className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
-      <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+      <div className="bg-card/50 border-border/50 border-b backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
@@ -199,13 +239,13 @@ export default function BalancoPatrimonial() {
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
-                  initialFocus
                   mode="range"
                   defaultMonth={dateRange?.from}
                   selected={dateRange}
                   onSelect={setDateRange}
                   numberOfMonths={2}
                   locale={ptBR}
+                  captionLayout="dropdown"
                 />
               </PopoverContent>
             </Popover>
@@ -231,9 +271,19 @@ export default function BalancoPatrimonial() {
           </div>
         ) : (
           <>
-            <div className="bg-muted/50 border-border mb-6 rounded-lg border p-4 text-center">
-              <p className="text-muted-foreground text-sm font-medium">
-                Posição em{" "}
+            <div className="bg-primary/10 border-primary/20 mb-6 rounded-lg border p-4 text-center">
+              <p className="text-muted-foreground text-lg font-medium">
+                Posição de{" "}
+                <span className="text-foreground font-semibold">
+                  {format(
+                    dateRange?.from || new Date(),
+                    "dd 'de' MMMM 'de' yyyy",
+                    {
+                      locale: ptBR,
+                    },
+                  )}
+                </span>{" "}
+                até{" "}
                 <span className="text-foreground font-semibold">
                   {format(
                     dateRange?.to || new Date(),
@@ -252,9 +302,13 @@ export default function BalancoPatrimonial() {
                 <SectionTitle>ATIVO</SectionTitle>
 
                 <SubsectionTitle>Circulante</SubsectionTitle>
-                {balanceSheet.ativo.circulante.accounts.map((acc: any) => (
-                  <AccountLine key={acc.code} {...acc} indent />
-                ))}
+                {balanceSheet.ativo.circulante.accounts.map(
+                  (
+                    acc: BalanceSheetAccount, // 3. TIPO APLICADO NO MAP
+                  ) => (
+                    <AccountLine key={acc.code} {...acc} indent />
+                  ),
+                )}
                 <TotalLine
                   label="Total Ativo Circulante"
                   value={balanceSheet.ativo.circulante.total}
@@ -269,7 +323,7 @@ export default function BalancoPatrimonial() {
                       Realizável a Longo Prazo
                     </p>
                     {balanceSheet.ativo.naoCirculante.realizavelLongoPrazo.accounts.map(
-                      (acc: any) => (
+                      (acc: BalanceSheetAccount) => (
                         <AccountLine key={acc.code} {...acc} indent />
                       ),
                     )}
@@ -283,7 +337,7 @@ export default function BalancoPatrimonial() {
                       Investimentos
                     </p>
                     {balanceSheet.ativo.naoCirculante.investimentos.accounts.map(
-                      (acc: any) => (
+                      (acc: BalanceSheetAccount) => (
                         <AccountLine key={acc.code} {...acc} indent />
                       ),
                     )}
@@ -297,7 +351,7 @@ export default function BalancoPatrimonial() {
                       Imobilizado
                     </p>
                     {balanceSheet.ativo.naoCirculante.imobilizado.accounts.map(
-                      (acc: any) => (
+                      (acc: BalanceSheetAccount) => (
                         <AccountLine key={acc.code} {...acc} indent />
                       ),
                     )}
@@ -311,7 +365,7 @@ export default function BalancoPatrimonial() {
                       Intangível
                     </p>
                     {balanceSheet.ativo.naoCirculante.intangivel.accounts.map(
-                      (acc: any) => (
+                      (acc: BalanceSheetAccount) => (
                         <AccountLine key={acc.code} {...acc} indent />
                       ),
                     )}
@@ -330,18 +384,22 @@ export default function BalancoPatrimonial() {
                 <SectionTitle>PASSIVO</SectionTitle>
 
                 <SubsectionTitle>Circulante</SubsectionTitle>
-                {balanceSheet.passivo.circulante.accounts.map((acc: any) => (
-                  <AccountLine key={acc.code} {...acc} indent />
-                ))}
+                {balanceSheet.passivo.circulante.accounts.map(
+                  (acc: BalanceSheetAccount) => (
+                    <AccountLine key={acc.code} {...acc} indent />
+                  ),
+                )}
                 <TotalLine
                   label="Total Passivo Circulante"
                   value={balanceSheet.passivo.circulante.total}
                 />
 
                 <SubsectionTitle>Não Circulante</SubsectionTitle>
-                {balanceSheet.passivo.naoCirculante.accounts.map((acc: any) => (
-                  <AccountLine key={acc.code} {...acc} indent />
-                ))}
+                {balanceSheet.passivo.naoCirculante.accounts.map(
+                  (acc: BalanceSheetAccount) => (
+                    <AccountLine key={acc.code} {...acc} indent />
+                  ),
+                )}
                 <TotalLine
                   label="Total Passivo Não Circulante"
                   value={balanceSheet.passivo.naoCirculante.total}
@@ -353,9 +411,11 @@ export default function BalancoPatrimonial() {
                 />
 
                 <SectionTitle>PATRIMÔNIO LÍQUIDO</SectionTitle>
-                {balanceSheet.patrimonioLiquido.accounts.map((acc: any) => (
-                  <AccountLine key={acc.code} {...acc} indent />
-                ))}
+                {balanceSheet.patrimonioLiquido.accounts.map(
+                  (acc: BalanceSheetAccount) => (
+                    <AccountLine key={acc.code} {...acc} indent />
+                  ),
+                )}
                 <TotalLine
                   label="Total Patrimônio Líquido"
                   value={balanceSheet.patrimonioLiquido.total}
@@ -370,6 +430,7 @@ export default function BalancoPatrimonial() {
                       balanceSheet.patrimonioLiquido.total
                     }
                     bold
+                    className="!mt-0 !border-t-0 !pt-0"
                   />
                 </div>
               </div>

@@ -120,9 +120,11 @@ export default function Home() {
 
       toast.success(`Transação #${transactionNumber} salva com sucesso!`);
       resetEntries();
-    } catch (err: any) {
-      console.error("Erro ao salvar lançamento:", err.message);
-      toast.error("Não foi possível salvar o lançamento");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("Erro ao salvar lançamento:", err.message);
+        toast.error("Não foi possível salvar o lançamento");
+      }
     } finally {
       setSaving(false);
     }
@@ -131,7 +133,7 @@ export default function Home() {
   return (
     <div className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
       {/* Header */}
-      <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+      <div className="bg-card/50 border-border/50 border-b backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -210,12 +212,12 @@ export default function Home() {
           <Card
             className={cn(
               "border-border transition-all duration-300",
-              isBalanced
-                ? "border-green-600/30 shadow-green-600/5"
-                : "border-destructive/30 shadow-destructive/5",
+              // isBalanced
+              //   ? "border-green-600/30 shadow-green-600/5"
+              //   : "border-destructive/30 shadow-destructive/5",
             )}
           >
-            <CardHeader className="bg-muted/50 rounded-t-xl py-6">
+            <CardHeader className="bg-accent -mt-6 rounded-t-xl py-6">
               <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-3">
                 <div className="text-center md:text-left">
                   <div className="text-muted-foreground mb-1 text-sm font-medium">
@@ -269,7 +271,8 @@ export default function Home() {
 
             {validationErrors.length > 0 && (
               <CardContent className="pt-6">
-                <div className="border-destructive/20 bg-destructive/5 rounded-lg border p-4">
+                {/* classes da div abaixo className="border-destructive/20 bg-destructive/5 rounded-lg border p-4" */}
+                <div>
                   <div className="mb-3 flex items-center gap-2">
                     <AlertCircle className="text-destructive h-4 w-4" />
                     <h4 className="text-destructive font-medium">

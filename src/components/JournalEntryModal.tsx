@@ -116,8 +116,13 @@ export function JournalEntryModal({
 
       resetEntries();
       onOpenChange(false);
-    } catch (err: any) {
-      console.error("Erro ao salvar lançamento:", err.message);
+    } catch (err: unknown) {
+      // CORREÇÃO APLICADA AQUI
+      let errorMessage = "Ocorreu um erro desconhecido ao salvar o lançamento.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      console.error("Erro ao salvar lançamento:", errorMessage);
     } finally {
       setSaving(false);
     }

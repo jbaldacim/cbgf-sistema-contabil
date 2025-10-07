@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export default function AuthenticationPage() {
   const [view, setView] = useState<"login" | "signup">("login");
@@ -85,6 +86,9 @@ export default function AuthenticationPage() {
 
   return (
     <div className="from-background via-background to-muted/30 flex min-h-screen w-full flex-col items-center justify-center gap-10 bg-gradient-to-br px-4">
+      <div className="absolute top-5 right-5">
+        <ModeToggle />
+      </div>
       <p className="text-center text-6xl italic">
         CBGF<br></br>Contábil
       </p>

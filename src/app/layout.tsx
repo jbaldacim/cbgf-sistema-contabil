@@ -11,6 +11,7 @@ import { JournalEntryModal } from "@/components/JournalEntryModal";
 import { Toaster } from "@/components/ui/sonner";
 import { Header } from "@/components/Header";
 import { AuthGuard } from "@/components/AuthGuard";
+import { ThemeProvider } from "@/components/Theme-Provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,16 +62,23 @@ export default function RootLayout({
   // ];
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthGuard>
-          <Header />
-          {/* <Navigation /> */}
-          <main>{children}</main>
-          <Toaster />
-        </AuthGuard>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthGuard>
+            <Header />
+            {/* <Navigation /> */}
+            <main>{children}</main>
+            <Toaster richColors />
+          </AuthGuard>
+        </ThemeProvider>
         {/* 3. Pass the updated actions to the FAB */}
         {/* <FloatingActionButton
           items={actions}

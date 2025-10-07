@@ -1,8 +1,9 @@
-// TODO Traduzir dias do mês
+// TODO Traduzir dias do mês - Resolvido!
 "use client";
 
 import * as React from "react";
 import { CalendarIcon } from "lucide-react";
+import { ptBR } from "date-fns/locale"; // 1. Importe a localidade pt-BR
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,7 +19,6 @@ function formatDate(date: Date | undefined) {
   if (!date) {
     return "";
   }
-
   return date.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -37,9 +37,14 @@ type Props = { date: Date; onDateChange: (value: Date) => void };
 
 export function DatePicker({ date = new Date(), onDateChange }: Props) {
   const [open, setOpen] = React.useState(false);
-  // const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [value, setValue] = React.useState(formatDate(date));
+
+  // Sincroniza o estado interno se a prop externa mudar
+  React.useEffect(() => {
+    setValue(formatDate(date));
+    setMonth(date);
+  }, [date]);
 
   return (
     <div className="flex flex-col p-1">
@@ -50,14 +55,27 @@ export function DatePicker({ date = new Date(), onDateChange }: Props) {
         <Input
           id="date"
           value={value}
-          placeholder={Date.now().toString()}
+          placeholder="dd/mm/aaaa"
           className="bg-background pr-10"
           onChange={(e) => {
-            const date = new Date(e.target.value);
             setValue(e.target.value);
-            if (isValidDate(date)) {
-              onDateChange(date);
-              setMonth(date);
+            // Tenta converter o texto para uma data válida no formato brasileiro
+            const parts = e.target.value.split("/");
+            if (parts.length === 3) {
+              const [day, month, year] = parts.map(Number);
+              if (
+                day > 0 &&
+                day <= 31 &&
+                month > 0 &&
+                month <= 12 &&
+                year > 1000
+              ) {
+                const newDate = new Date(year, month - 1, day);
+                if (isValidDate(newDate)) {
+                  onDateChange(newDate);
+                  setMonth(newDate);
+                }
+              }
             }
           }}
           onKeyDown={(e) => {
@@ -72,9 +90,9 @@ export function DatePicker({ date = new Date(), onDateChange }: Props) {
             <Button
               id="date-picker"
               variant="ghost"
-              className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+              className="absolute top-1/2 right-2 size-6 -translate-y-1/2 p-0"
             >
-              <CalendarIcon className="size-3.5" />
+              <CalendarIcon className="size-4" />
               <span className="sr-only">Selecione a data</span>
             </Button>
           </PopoverTrigger>
@@ -85,16 +103,21 @@ export function DatePicker({ date = new Date(), onDateChange }: Props) {
             sideOffset={10}
           >
             <Calendar
+              locale={ptBR} // 2. Passe a localidade para o componente
               mode="single"
               selected={date}
-              captionLayout="dropdown"
-              month={month}
-              onMonthChange={setMonth}
-              onSelect={(date) => {
-                onDateChange(date);
-                setValue(formatDate(date));
+              onSelect={(selectedDate) => {
+                if (selectedDate) {
+                  onDateChange(selectedDate);
+                  setValue(formatDate(selectedDate));
+                }
                 setOpen(false);
               }}
+              month={month}
+              onMonthChange={setMonth}
+              captionLayout="dropdown"
+              fromYear={1960}
+              toYear={2030}
             />
           </PopoverContent>
         </Popover>

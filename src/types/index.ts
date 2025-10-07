@@ -7,7 +7,6 @@ export interface Account {
   subgroup2: string;
   codeAndName: string;
   balance: number;
-  history: (Omit<JournalEntry, "accountId"> & { date: Date })[];
 }
 
 export type AccountGroup =

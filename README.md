@@ -4,9 +4,18 @@
 - [x] Implementar Balanço Patrimonial
 - [x] Deleção de entradas pelo livro diário (com actions na data-table)
 - [x] Adição e Deleção de Contas
-<!-- - [ ] Floating Action Button -->
-- [ ] Adicionar Autenticação
-- [ ] Descobrir como inserir contas por usuário
+- [x] Adicionar Autenticação
+- [x] Descobrir como inserir contas por usuário
+- [x] Inserir contas por usuário
+- [x] Mudar datas para pt-br
+- [x] Melhorar Date Picker
+- [ ]
+- [ ] Arrumar layout mobile
+- [ ] Arrumar erros em build
+
+## Opcional
+
+- [ ] Floating Action Button
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with
 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).

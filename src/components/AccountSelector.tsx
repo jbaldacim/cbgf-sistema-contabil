@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react"; // 1. Importa o useState
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
@@ -27,9 +27,7 @@ type Props = {
   onAmountChange: (value: string) => void;
   excludeAccounts?: string[];
   className?: string;
-  /** new: chamada quando clicar em remover */
   onRemove?: () => void;
-  /** new: se o botão deve estar habilitado/visível */
   showRemoveButton?: boolean;
   accounts: Account[];
 };
@@ -45,8 +43,15 @@ const AccountSelector = ({
   showRemoveButton = true,
   accounts,
 }: Props) => {
+  // 2. Unifica o estado para controlar tanto o Popover quanto o Drawer
+  const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const selected = accounts.find((a) => a.code === value);
+
+  const handleSelect = (val: string) => {
+    onChange(val);
+    setIsOpen(false); // Função unificada para fechar o componente
+  };
 
   const grouped = accounts.reduce<Record<string, Account[]>>((acc, accnt) => {
     acc[accnt.accountGroup] = acc[accnt.accountGroup] || [];
@@ -84,7 +89,6 @@ const AccountSelector = ({
       <CommandInput placeholder="Buscar conta..." />
       <CommandList>
         <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>
-
         {Object.entries(grouped).map(([group, items]) => (
           <React.Fragment key={group}>
             <CommandGroup heading={group}>
@@ -98,7 +102,7 @@ const AccountSelector = ({
                       account.name.toLowerCase(),
                       account.accountGroup.toLowerCase(),
                     ]}
-                    onSelect={(val) => onChange(val)}
+                    onSelect={handleSelect} // Usa a função de seleção unificada
                   >
                     <Check
                       className={cn(
@@ -119,21 +123,21 @@ const AccountSelector = ({
 
   if (isDesktop) {
     return (
-      // layout: [ trigger (flex-1) | amount (fixed) | remove (fixed) ]
       <div className="flex w-full items-center gap-3">
         <div className="min-w-0 flex-1">
-          <Popover>
-            <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="popover-content-width-full min-w-0 p-0">
+          {/* 3. Controla o Popover com o estado unificado */}
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger className="w-full" asChild>
+              {triggerButton}
+            </PopoverTrigger>
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
               {commandList}
             </PopoverContent>
           </Popover>
         </div>
-
         <div className="w-32 flex-shrink-0">
           <AmountInput value={amount} onChange={onAmountChange} />
         </div>
-
         <div className="flex-shrink-0">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -151,14 +155,11 @@ const AccountSelector = ({
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              {showRemoveButton ? (
-                "Remover conta"
-              ) : (
-                <div className="max-w-xs text-center text-xs">
-                  Impossível remover conta: pelo menos uma conta de débito e uma
-                  de crédito devem ser selecionadas
-                </div>
-              )}
+              <p className="text-xs">
+                {showRemoveButton
+                  ? "Remover conta"
+                  : "Impossível remover conta"}
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -166,74 +167,18 @@ const AccountSelector = ({
     );
   }
 
-  // mobile: trigger (flex-1) | amount (fixed) | remove (fixed)
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-
   return (
     <div className="flex w-full items-center gap-3">
       <div className="min-w-0 flex-1">
-        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerTrigger asChild onClick={() => setIsDrawerOpen(true)}>
-            {triggerButton}
-          </DrawerTrigger>
-          <DrawerContent className="min-w-0 p-4">
-            <Command
-              filter={(value, search, keywords) => {
-                const extendedValue = value + " " + keywords?.join(" ");
-                return extendedValue
-                  .toLowerCase()
-                  .includes(search.toLowerCase())
-                  ? 1
-                  : 0;
-              }}
-            >
-              <CommandInput placeholder="Buscar conta..." />
-              <CommandList>
-                <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>
-
-                {Object.entries(grouped).map(([group, items]) => (
-                  <React.Fragment key={group}>
-                    <CommandGroup heading={group}>
-                      {items
-                        .filter((a) => !excludeAccounts.includes(a.code))
-                        .map((account) => (
-                          <CommandItem
-                            key={account.code}
-                            value={account.code}
-                            keywords={[
-                              account.name.toLowerCase(),
-                              account.accountGroup.toLowerCase(),
-                            ]}
-                            onSelect={(val) => {
-                              onChange(val);
-                              setIsDrawerOpen(false); // Fecha o Drawer ao selecionar
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                value === account.code
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                            {account.code + " - " + account.name}
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                    <CommandSeparator />
-                  </React.Fragment>
-                ))}
-              </CommandList>
-            </Command>
-          </DrawerContent>
+        {/* 4. Controla o Drawer com o mesmo estado unificado */}
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+          <DrawerContent className="min-w-0 p-4">{commandList}</DrawerContent>
         </Drawer>
       </div>
-
       <div className="w-32 flex-shrink-0">
         <AmountInput value={amount} onChange={onAmountChange} />
       </div>
-
       <div className="flex-shrink-0">
         <Tooltip>
           <TooltipTrigger asChild>

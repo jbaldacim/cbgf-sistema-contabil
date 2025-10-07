@@ -77,17 +77,18 @@ export function EntriesCard({
   return (
     <AnimatePresence initial={false} mode="popLayout">
       <motion.div>
-        <Card>
-          <CardHeader className="bg-accent -mt-6 rounded-t-xl py-4">
+        <Card className="pt-0">
+          <CardHeader className="bg-accent rounded-t-xl py-4">
             <CardTitle className="text-lg">{title}</CardTitle>
-            <CardDescription className="text-zinc-800">
-              {description}
-            </CardDescription>
+            <CardDescription>{description}</CardDescription>
             <CardAction className="self-center">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => addEntry(type)}>
-                    <Plus className="size-4 text-white" />
+                  <Button
+                    className="bg-foreground"
+                    onClick={() => addEntry(type)}
+                  >
+                    <Plus className="text-background size-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -96,6 +97,30 @@ export function EntriesCard({
               </Tooltip>
             </CardAction>
           </CardHeader>
+
+          {/* Isso talvez seja melhor */}
+          {/* <Card className="pt-0 pb-4">
+          <CardHeader className="bg-accent flex flex-col items-center justify-start rounded-t-xl px-6 py-4">
+            <div className="flex w-full flex-row items-center justify-between">
+              <CardTitle className="text-lg">{title}</CardTitle>
+              <CardAction className="self-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="bg-foreground"
+                      onClick={() => addEntry(type)}
+                    >
+                      <Plus className="text-background size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Adicionar conta</p>
+                  </TooltipContent>
+                </Tooltip>
+              </CardAction>
+            </div>
+            <CardDescription className="w-full">{description}</CardDescription>
+          </CardHeader> */}
 
           <CardContent className="flex flex-col">
             <AnimatePresence initial={false} mode="sync">
@@ -172,7 +197,7 @@ export function EntriesCard({
                               parseFloat(value) || 0,
                             )
                           }
-                          className={cn(duplicated && "border-destructive")}
+                          className={cn(duplicated && "border-destructive!")}
                           onRemove={() => removeEntry(entry.id)}
                           showRemoveButton={showRemoveButton}
                           accounts={accounts}

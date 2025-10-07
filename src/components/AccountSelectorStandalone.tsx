@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
@@ -15,9 +15,8 @@ import {
   CommandSeparator,
 } from "./ui/command";
 import { cn } from "@/lib/utils";
-import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from "./ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
 import type { Account } from "@/types";
-import { PopoverClose } from "@radix-ui/react-popover";
 
 type Props = {
   value: string;
@@ -36,6 +35,7 @@ const AccountSelectorStandalone = ({
   placeholder = "Selecione uma conta",
   accounts,
 }: Props) => {
+  const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const selected = accounts.find((a) => a.code === value);
 
@@ -74,7 +74,6 @@ const AccountSelectorStandalone = ({
       <CommandInput placeholder="Buscar conta..." />
       <CommandList>
         <CommandEmpty>Nenhuma conta encontrada.</CommandEmpty>
-
         {Object.entries(grouped).map(([group, items]) => (
           <React.Fragment key={group}>
             <CommandGroup heading={group}>
@@ -88,7 +87,10 @@ const AccountSelectorStandalone = ({
                       account.name.toLowerCase(),
                       account.accountGroup.toLowerCase(),
                     ]}
-                    onSelect={(val) => onChange(val)}
+                    onSelect={(val) => {
+                      onChange(val);
+                      setOpen(false);
+                    }}
                   >
                     <Check
                       className={cn(
@@ -109,21 +111,23 @@ const AccountSelectorStandalone = ({
 
   if (isDesktop) {
     return (
-      <Popover>
-        <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-        <PopoverContent className="popover-content-width-full min-w-0 p-0">
-          <PopoverClose asChild>{commandList}</PopoverClose>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger className="w-full" asChild>
+          {triggerButton}
+        </PopoverTrigger>
+        {/* --- MUDANÇA PRINCIPAL AQUI --- */}
+        {/* Usamos a variável CSS do Radix para definir a largura do conteúdo */}
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+          {commandList}
         </PopoverContent>
       </Popover>
     );
   }
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-      <DrawerContent className="min-w-0 p-4">
-        <DrawerClose asChild>{commandList}</DrawerClose>
-      </DrawerContent>
+      <DrawerContent className="min-w-0 p-4">{commandList}</DrawerContent>
     </Drawer>
   );
 };

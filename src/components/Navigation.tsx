@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes"; // Importe o hook useTheme
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { ModeToggle } from "./ModeToggle";
 
 const navLinks = [
   { href: "/", label: "Lançamentos" },
@@ -14,14 +17,12 @@ const navLinks = [
 
 export function Navigation() {
   const pathname = usePathname();
+  const { setTheme } = useTheme(); // Hook para controlar o tema
 
   return (
-    <div className="flex w-full justify-center px-2 pt-4 sm:px-4">
+    // Modificado para alinhar o botão de tema ao lado
+    <div className="flex w-full items-center justify-center gap-2 px-2 pt-4 sm:px-4">
       <Tabs value={pathname} className="w-full max-w-2xl">
-        {/* 
-          No mobile: scroll horizontal
-          No desktop: grid
-        */}
         <TabsList
           className="bg-muted/40 scrollbar-hide flex w-full gap-1 overflow-x-auto rounded-lg border sm:grid sm:grid-cols-5"
           aria-label="Navegação principal"
@@ -38,6 +39,8 @@ export function Navigation() {
           ))}
         </TabsList>
       </Tabs>
+
+      <ModeToggle />
     </div>
   );
 }

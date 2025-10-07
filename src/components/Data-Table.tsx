@@ -66,11 +66,11 @@ export function DataTable<TData, TValue>({
     code !== undefined && setCode !== undefined && accounts !== undefined;
 
   return (
-    <div className="container mx-auto px-4 sm:px-6">
+    <div className="container mx-auto">
       <div className="mb-6 space-y-4">
         <div className="flex flex-col gap-4 md:flex-row lg:items-center lg:justify-between">
           {showAccountSelector && (
-            <div className="flex items-center gap-3 transition-all md:w-1/5 md:max-xl:grow">
+            <div className="flex items-center gap-3 transition-all md:w-1/3">
               <span className="text-muted-foreground text-sm font-medium">
                 Conta:
               </span>
@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
                   key={headerGroup.id}
-                  className="bg-muted/50 hover:bg-muted/50 border-b"
+                  className="bg-accent hover:bg-accent/70 border-b"
                 >
                   {headerGroup.headers.map((header) => (
                     <TableHead

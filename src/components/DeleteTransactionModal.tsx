@@ -91,7 +91,7 @@ export function DeleteTransactionModal({
             />
             {confirmationText && !isConfirmEnabled && (
               <p className="text-destructive mt-2 text-xs">
-                O texto não corresponde. Digite exatamente "excluir".
+                O texto não corresponde. Digite exatamente &quot;excluir&quot;.
               </p>
             )}
             {isConfirmEnabled && (

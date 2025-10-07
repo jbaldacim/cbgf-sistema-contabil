@@ -3,17 +3,30 @@ import { normalizeAccounts } from "@/lib/normalizers";
 import { supabase } from "@/lib/supabaseClient";
 import type { Account } from "@/types";
 import { useEffect, useState } from "react";
-import { columns } from "@/components/Columns-LivroRazao";
+// 1. IMPORTANDO O TIPO 'Entry' DIRETAMENTE DO ARQUIVO DE COLUNAS
+import { columns, type Entry } from "@/components/Columns-LivroRazao";
 import { DataTable } from "@/components/Data-Table";
-import { BookMarked, Loader2 } from "lucide-react";
+import { BookMarked } from "lucide-react";
 
 export default function LivroRazao() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [code, setCode] = useState("1.0.1");
-  const [history, setHistory] = useState<any[]>([]);
+  // 2. O ESTADO AGORA USA O TIPO 'Entry' IMPORTADO
+  const [history, setHistory] = useState<Entry[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const isLoading = isLoadingAccounts || isLoadingHistory;
+
+  type FetchedEntry = {
+    id: string;
+    date: string;
+    description: string;
+    debito: number;
+    credito: number;
+    account_id: string;
+    transaction_id: string;
+    accounts: { code_and_name: string } | null;
+  };
 
   useEffect(() => {
     async function loadAccounts() {
@@ -25,36 +38,91 @@ export default function LivroRazao() {
 
       if (error) {
         console.error("Erro ao buscar contas:", error.message);
+        setIsLoadingAccounts(false);
         return;
       }
-
       const normalized = normalizeAccounts(data ?? []);
       setAccounts(normalized);
       setIsLoadingAccounts(false);
     }
-
     loadAccounts();
   }, []);
 
   useEffect(() => {
     async function loadHistory() {
-      const account = accounts.find((a) => a.code === code);
-      if (!account) return;
+      const selectedAccount = accounts.find((a) => a.code === code);
+      if (!selectedAccount || accounts.length === 0) return;
 
       setIsLoadingHistory(true);
 
-      const { data: entries, error } = await supabase
+      const { data: transactionIdsData, error: txIdError } = await supabase
         .from("journal_entries")
-        .select("*")
-        .eq("account_id", account.id)
-        .order("date");
+        .select("transaction_id")
+        .eq("account_id", selectedAccount.id);
 
-      if (error) {
-        console.error("Erro ao buscar histórico:", error.message);
+      if (txIdError) {
+        // ... tratamento de erro
         return;
       }
 
-      setHistory(entries ?? []);
+      const transactionIds = transactionIdsData.map((t) => t.transaction_id);
+
+      if (transactionIds.length === 0) {
+        setHistory([]);
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      const { data: allEntries, error: entriesError } = await supabase
+        .from("journal_entries")
+        .select("*, accounts(code_and_name)")
+        .in("transaction_id", transactionIds)
+        .order("date");
+
+      if (entriesError) {
+        // ... tratamento de erro
+        return;
+      }
+
+      const entriesByTransaction = allEntries.reduce(
+        (acc, entry) => {
+          const key = entry.transaction_id;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(entry);
+          return acc;
+        },
+        {} as Record<string, typeof allEntries>,
+      );
+
+      const finalHistory: Entry[] = [];
+
+      for (const transactionId in entriesByTransaction) {
+        const transactionEntries = entriesByTransaction[transactionId];
+
+        // CORREÇÃO APLICADA AQUI
+        const mainEntry = transactionEntries.find(
+          (e: FetchedEntry) => e.account_id === selectedAccount.id,
+        );
+
+        // E AQUI
+        const contraEntry = transactionEntries.find(
+          (e: FetchedEntry) => e.account_id !== selectedAccount.id,
+        );
+
+        if (mainEntry) {
+          finalHistory.push({
+            date: new Date(mainEntry.date),
+            description: mainEntry.description,
+            debito: mainEntry.debito,
+            credito: mainEntry.credito,
+            accountCodeAndName:
+              contraEntry?.accounts?.code_and_name ||
+              "Contrapartida não encontrada",
+          });
+        }
+      }
+
+      setHistory(finalHistory);
       setIsLoadingHistory(false);
     }
 
@@ -62,8 +130,9 @@ export default function LivroRazao() {
   }, [code, accounts]);
 
   return (
+    // Seu JSX permanece o mesmo e agora funcionará sem erros de tipo
     <main className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
-      <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+      <div className="bg-card/50 border-border/50 border-b backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
@@ -80,25 +149,15 @@ export default function LivroRazao() {
           </div>
         </div>
       </div>
-
       <div className="mx-auto max-w-7xl px-6 py-8">
-        {isLoading ? (
-          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-xl border shadow-sm">
-            <div className="text-muted-foreground flex flex-col items-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <p className="text-sm font-medium">Carregando dados...</p>
-            </div>
-          </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={history}
-            code={code}
-            setCode={setCode}
-            accounts={accounts}
-            isLoading={isLoading}
-          />
-        )}
+        <DataTable
+          columns={columns}
+          data={history}
+          code={code}
+          setCode={setCode}
+          accounts={accounts}
+          isLoading={isLoading}
+        />
       </div>
     </main>
   );

@@ -5,6 +5,7 @@ import { getColumns, type Entry } from "@/components/Columns-LivroDiario";
 import { DataTable } from "@/components/Data-Table";
 import { DeleteTransactionModal } from "@/components/DeleteTransactionModal";
 import { BookOpen, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LivroDiario() {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -17,8 +18,12 @@ export default function LivroDiario() {
   async function fetchEntries() {
     setIsLoading(true);
     const { data, error } = await supabase.rpc("get_journal_entries");
-    if (error) console.error("Erro ao buscar lançamentos:", error);
-    else if (data) setEntries(data);
+    if (error) {
+      console.error("Erro ao buscar lançamentos:", error);
+      toast.error("Não foi possível carregar os lançamentos.");
+    } else if (data) {
+      setEntries(data);
+    }
     setIsLoading(false);
   }
 
@@ -36,15 +41,38 @@ export default function LivroDiario() {
     setSelectedTransaction(null);
   };
 
+  // --- FUNÇÃO MODIFICADA ---
+  // Recriada sem usar toast.promise
   const handleDeleteTransaction = async () => {
     if (selectedTransaction === null) return;
-    const { error } = await supabase.rpc("delete_transaction", {
-      p_transaction_number: selectedTransaction,
-    });
-    if (error) console.error("Erro ao deletar transação:", error);
-    else {
+
+    // 1. Mostra um toast de carregamento e guarda seu ID
+    const toastId = toast.loading("Deletando transação...");
+
+    try {
+      // 2. Tenta executar a operação no banco de dados
+      const { error } = await supabase.rpc("delete_transaction", {
+        p_transaction_number: selectedTransaction,
+      });
+
+      // Se a operação no banco retornar um erro, lança-o para o bloco catch
+      if (error) {
+        throw error;
+      }
+
+      // 3. Se for bem-sucedido, atualiza o toast para sucesso
+      toast.success(`Transação #${selectedTransaction} deletada com sucesso!`, {
+        id: toastId,
+      });
+
       handleCloseModal();
-      fetchEntries();
+      fetchEntries(); // Recarrega os dados
+    } catch (error) {
+      // 4. Se qualquer erro ocorrer, atualiza o toast para erro
+      console.error("Erro ao deletar transação:", error);
+      toast.error("Falha ao deletar a transação.", {
+        id: toastId,
+      });
     }
   };
 
@@ -53,7 +81,7 @@ export default function LivroDiario() {
   return (
     <>
       <main className="from-background via-background to-muted/30 min-h-screen bg-gradient-to-br">
-        <div className="bg-card/50 border-border/50 sticky top-0 z-10 border-b backdrop-blur-sm">
+        <div className="bg-card/50 border-border/50 border-b backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-6 py-6">
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
@@ -70,21 +98,10 @@ export default function LivroDiario() {
             </div>
           </div>
         </div>
-
         <div className="mx-auto max-w-7xl px-6 py-8">
-          {isLoading ? (
-            <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-xl border shadow-sm">
-              <div className="text-muted-foreground flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <p className="text-sm font-medium">Carregando lançamentos...</p>
-              </div>
-            </div>
-          ) : (
-            <DataTable columns={columns} data={entries} isLoading={isLoading} />
-          )}
+          <DataTable columns={columns} data={entries} isLoading={isLoading} />
         </div>
       </main>
-
       <DeleteTransactionModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

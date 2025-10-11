@@ -11,8 +11,8 @@
 - [x] Melhorar Date Picker
 - [x] Arrumar erros em build
 - [x] Adicionar 'C' ou 'D' para negativos
+- [x] Impedir lançamento futuro
 - [ ] Adicionar filtro por data no Livro Razão
-- [ ] Impedir lançamento futuro
 - [ ] Usar `@supabase/ssr`
 - [ ] Página de confirmação deve esperar um tempo antes de redirecionar
 - [ ] Depreciação é o inverso do ativo

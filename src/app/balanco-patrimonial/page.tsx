@@ -3,8 +3,13 @@ import { normalizeAccounts } from "@/lib/normalizers";
 import type React from "react";
 
 import { supabase } from "@/lib/supabaseClient";
-import { formatarMoeda } from "@/lib/utils";
-import type { Account } from "@/types";
+import { formatarMoeda, formatarSaldoContabil } from "@/lib/utils";
+import type {
+  Account,
+  BalanceSheet,
+  BalanceSheetAccount,
+  BalanceSheetSection,
+} from "@/types";
 import { useEffect, useState } from "react";
 import { calculateBalanceSheet } from "@/lib/balanceSheet";
 import { CalendarIcon, Loader2, Scale } from "lucide-react";
@@ -19,18 +24,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-// 1. DEFINIÇÃO DOS TIPOS PARA O BALANÇO PATRIMONIAL
-interface BalanceSheetAccount {
-  code: string;
-  name: string;
-  balance: number;
-}
-
-interface BalanceSheetSection {
-  accounts: BalanceSheetAccount[];
-  total: number;
-}
 
 interface AtivoNaoCirculante {
   realizavelLongoPrazo: BalanceSheetSection;
@@ -49,12 +42,6 @@ interface Passivo {
   circulante: BalanceSheetSection;
   naoCirculante: BalanceSheetSection;
   total: number;
-}
-
-interface BalanceSheet {
-  ativo: Ativo;
-  passivo: Passivo;
-  patrimonioLiquido: BalanceSheetSection;
 }
 
 export default function BalancoPatrimonial() {
@@ -151,11 +138,13 @@ export default function BalancoPatrimonial() {
     code,
     name,
     balance,
+    accountGroup,
     indent = false,
   }: {
     code: string;
     name: string;
     balance: number;
+    accountGroup: string;
     indent?: boolean;
   }) => (
     <div
@@ -166,7 +155,7 @@ export default function BalancoPatrimonial() {
         <span className="ml-2">{name}</span>
       </span>
       <span className="text-sm font-medium tabular-nums">
-        {formatarMoeda(balance)}
+        {formatarSaldoContabil(balance, accountGroup)}
       </span>
     </div>
   );
@@ -174,11 +163,13 @@ export default function BalancoPatrimonial() {
   const TotalLine = ({
     label,
     value,
+    accountGroup,
     bold = false,
     className = "",
   }: {
     label: string;
     value: number;
+    accountGroup: string;
     bold?: boolean;
     className?: string;
   }) => (
@@ -188,7 +179,9 @@ export default function BalancoPatrimonial() {
       }`}
     >
       <span>{label}</span>
-      <span className="tabular-nums">{formatarMoeda(value)}</span>
+      <span className="tabular-nums">
+        {formatarSaldoContabil(value, accountGroup)}
+      </span>
     </div>
   );
 
@@ -312,6 +305,7 @@ export default function BalancoPatrimonial() {
                 <TotalLine
                   label="Total Ativo Circulante"
                   value={balanceSheet.ativo.circulante.total}
+                  accountGroup="Ativo"
                 />
 
                 <SubsectionTitle>Não Circulante</SubsectionTitle>
@@ -375,6 +369,7 @@ export default function BalancoPatrimonial() {
                 <TotalLine
                   label="Total Ativo"
                   value={balanceSheet.ativo.total}
+                  accountGroup="Ativo"
                   bold
                 />
               </div>
@@ -392,6 +387,7 @@ export default function BalancoPatrimonial() {
                 <TotalLine
                   label="Total Passivo Circulante"
                   value={balanceSheet.passivo.circulante.total}
+                  accountGroup="Passivo"
                 />
 
                 <SubsectionTitle>Não Circulante</SubsectionTitle>
@@ -403,11 +399,13 @@ export default function BalancoPatrimonial() {
                 <TotalLine
                   label="Total Passivo Não Circulante"
                   value={balanceSheet.passivo.naoCirculante.total}
+                  accountGroup="Passivo"
                 />
 
                 <TotalLine
                   label="Total Passivo"
                   value={balanceSheet.passivo.total}
+                  accountGroup="Passivo"
                 />
 
                 <SectionTitle>PATRIMÔNIO LÍQUIDO</SectionTitle>
@@ -419,6 +417,7 @@ export default function BalancoPatrimonial() {
                 <TotalLine
                   label="Total Patrimônio Líquido"
                   value={balanceSheet.patrimonioLiquido.total}
+                  accountGroup="Patrimônio Líquido"
                   bold
                 />
 
@@ -429,6 +428,7 @@ export default function BalancoPatrimonial() {
                       balanceSheet.passivo.total +
                       balanceSheet.patrimonioLiquido.total
                     }
+                    accountGroup="Passivo + Patrimônio Líquido"
                     bold
                     className="!mt-0 !border-t-0 !pt-0"
                   />

@@ -31,6 +31,7 @@ export function calculateBalanceSheet(
         code: a.code,
         name: a.name,
         balance: a.balance,
+        accountGroup: a.accountGroup,
       }));
   };
 
@@ -138,6 +139,7 @@ export function calculateBalanceSheet(
       total: totalPassivo,
     },
     patrimonioLiquido: {
+      title: "Patrimônio Líquido",
       accounts: patrimonioLiquido,
       total: totalPatrimonioLiquido,
     },

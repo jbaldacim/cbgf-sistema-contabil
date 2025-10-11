@@ -47,16 +47,20 @@ export interface TransactionFormData {
   }>;
 }
 
+export type BalanceSheetAccount = {
+  code: string;
+  name: string;
+  balance: number;
+  accountGroup: string; // A propriedade que faltava!
+};
+
 export type BalanceSheetSection = {
   title: string;
-  accounts: {
-    code: string;
-    name: string;
-    balance: number;
-  }[];
+  accounts: BalanceSheetAccount[]; // <-- USE O NOVO TIPO AQUI
   total: number;
 };
 
+// 3. ATUALIZE ESTE TIPO
 export type BalanceSheet = {
   date: Date;
   ativo: {
@@ -74,12 +78,5 @@ export type BalanceSheet = {
     naoCirculante: BalanceSheetSection;
     total: number;
   };
-  patrimonioLiquido: {
-    accounts: {
-      code: string;
-      name: string;
-      balance: number;
-    }[];
-    total: number;
-  };
+  patrimonioLiquido: BalanceSheetSection;
 };

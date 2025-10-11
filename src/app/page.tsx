@@ -270,7 +270,12 @@ export default function Home() {
             </CardHeader>
 
             {validationErrors.length > 0 && (
-              <CardContent className="pt-6">
+              <CardContent
+                className={cn(
+                  "pt-6",
+                  validationErrors.length === 0 && "!m-0 !p-0",
+                )}
+              >
                 {/* classes da div abaixo className="border-destructive/20 bg-destructive/5 rounded-lg border p-4" */}
                 <div>
                   <div className="mb-3 flex items-center gap-2">
@@ -279,14 +284,10 @@ export default function Home() {
                       Problemas encontrados
                     </h4>
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="list-inside list-disc space-y-2">
                     {validationErrors.map((error, index) => (
-                      <li
-                        key={index}
-                        className="text-destructive flex items-start gap-2 text-sm"
-                      >
-                        <span className="text-destructive/60 mt-1">•</span>
-                        <span>{error}</span>
+                      <li key={index} className="text-destructive text-sm">
+                        {error}
                       </li>
                     ))}
                   </ul>

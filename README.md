@@ -9,9 +9,17 @@
 - [x] Inserir contas por usuário
 - [x] Mudar datas para pt-br
 - [x] Melhorar Date Picker
-- [ ]
+- [x] Arrumar erros em build
+- [ ] Adicionar 'C' ou 'D' para negativos
+- [ ] Adicionar filtro por data no Livro Razão
+- [ ] Impedir lançamento futuro
+- [ ] Usar `@supabase/ssr`
+- [ ] Página de confirmação deve esperar um tempo antes de redirecionar
+- [ ] Depreciação é o inverso do ativo
+- [ ] Criar lançamento inverso ao cancelar
+- [ ] Exportar .pdf do Balanço Patrimonial
+- [ ] Criar walkthrough
 - [ ] Arrumar layout mobile
-- [ ] Arrumar erros em build
 
 ## Opcional
 

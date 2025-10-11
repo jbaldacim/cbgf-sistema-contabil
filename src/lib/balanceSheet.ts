@@ -122,6 +122,7 @@ export function calculateBalanceSheet(
           accounts: intangivel,
           total: totalIntangivel,
         },
+        total: totalAtivoNaoCirculante,
       },
       total: totalAtivo,
     },

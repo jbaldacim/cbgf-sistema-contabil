@@ -116,8 +116,10 @@ export function DatePicker({ date = new Date(), onDateChange }: Props) {
               month={month}
               onMonthChange={setMonth}
               captionLayout="dropdown"
-              fromYear={1960}
-              toYear={2030}
+              startMonth={new Date(1900,0)}
+              endMonth={new Date()}
+              disabled={{after: new Date()}}
+              showOutsideDays={false}
             />
           </PopoverContent>
         </Popover>

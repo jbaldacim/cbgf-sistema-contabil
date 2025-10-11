@@ -10,7 +10,7 @@
 - [x] Mudar datas para pt-br
 - [x] Melhorar Date Picker
 - [x] Arrumar erros em build
-- [ ] Adicionar 'C' ou 'D' para negativos
+- [x] Adicionar 'C' ou 'D' para negativos
 - [ ] Adicionar filtro por data no Livro Razão
 - [ ] Impedir lançamento futuro
 - [ ] Usar `@supabase/ssr`

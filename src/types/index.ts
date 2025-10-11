@@ -70,6 +70,7 @@ export type BalanceSheet = {
       investimentos: BalanceSheetSection;
       imobilizado: BalanceSheetSection;
       intangivel: BalanceSheetSection;
+      total: number;
     };
     total: number;
   };

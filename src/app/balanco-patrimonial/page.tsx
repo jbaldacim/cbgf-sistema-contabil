@@ -3,7 +3,7 @@ import { normalizeAccounts } from "@/lib/normalizers";
 import type React from "react";
 
 import { supabase } from "@/lib/supabaseClient";
-import { formatarMoeda, formatarSaldoContabil } from "@/lib/utils";
+import { formatarSaldoContabil } from "@/lib/utils";
 import type {
   Account,
   BalanceSheet,
@@ -12,18 +12,11 @@ import type {
 } from "@/types";
 import { useEffect, useState } from "react";
 import { calculateBalanceSheet } from "@/lib/balanceSheet";
-import { CalendarIcon, Loader2, Scale } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Scale } from "lucide-react";
+import { endOfDay, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { DateRangePicker } from "@/components/DateRangePicker";
 
 interface AtivoNaoCirculante {
   realizavelLongoPrazo: BalanceSheetSection;
@@ -47,7 +40,6 @@ interface Passivo {
 export default function BalancoPatrimonial() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // 2. APLICAÇÃO DO TIPO CORRETO NO ESTADO
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 0, 1),
@@ -59,6 +51,9 @@ export default function BalancoPatrimonial() {
       if (!dateRange?.from || !dateRange?.to) return;
 
       setIsLoading(true);
+
+      const fromDate = dateRange.from.toISOString();
+      const toDate = endOfDay(dateRange.to).toISOString();
 
       const { data: accountsData, error: accountsError } = await supabase
         .from("accounts")
@@ -74,8 +69,8 @@ export default function BalancoPatrimonial() {
       const { data: entries, error: entriesError } = await supabase
         .from("journal_entries")
         .select("*")
-        .gte("date", dateRange.from.toISOString())
-        .lte("date", dateRange.to.toISOString());
+        .gte("date", fromDate)
+        .lte("date", toDate);
 
       if (entriesError) {
         console.error("Erro ao buscar lançamentos:", entriesError.message);
@@ -204,44 +199,13 @@ export default function BalancoPatrimonial() {
               </div>
             </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal sm:w-[300px]",
-                    !dateRange && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange?.from ? (
-                    dateRange.to ? (
-                      <>
-                        {format(dateRange.from, "dd/MM/yyyy", {
-                          locale: ptBR,
-                        })}{" "}
-                        - {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
-                      </>
-                    ) : (
-                      format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
-                    )
-                  ) : (
-                    <span>Selecione o período</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="range"
-                  defaultMonth={dateRange?.from}
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  numberOfMonths={2}
-                  locale={ptBR}
-                  captionLayout="dropdown"
-                />
-              </PopoverContent>
-            </Popover>
+            
+
+            <DateRangePicker
+              date={dateRange}
+              setDate={setDateRange}
+              className="w-full sm:w-auto"
+            />
           </div>
         </div>
       </div>
@@ -365,6 +329,12 @@ export default function BalancoPatrimonial() {
                     )}
                   </>
                 )}
+
+                <TotalLine
+                  label="Total Ativo Não Circulante"
+                  value={balanceSheet.ativo.naoCirculante.total}
+                  accountGroup="Ativo"
+                />
 
                 <TotalLine
                   label="Total Ativo"

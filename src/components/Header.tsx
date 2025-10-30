@@ -76,7 +76,7 @@ export function Header() {
         <nav className="relative flex items-center gap-6">
           {/* Hover Highlight */}
           <div
-            className="absolute flex h-[30px] items-center rounded-[6px] bg-[#0e0f1114] transition-all duration-300 ease-out dark:bg-[#ffffff1a]"
+            className="absolute flex h-[30px] items-center rounded-md bg-[#0e0f1114] transition-all duration-300 ease-out dark:bg-[#ffffff1a]"
             style={{
               ...hoverStyle,
               opacity: hoveredIndex !== null ? 1 : 0,

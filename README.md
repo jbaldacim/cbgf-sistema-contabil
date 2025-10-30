@@ -16,7 +16,7 @@
 - [ ] Usar `@supabase/ssr`
 - [ ] Página de confirmação deve esperar um tempo antes de redirecionar
 - [ ] Depreciação é o inverso do ativo
-- [ ] Criar lançamento inverso ao cancelar
+- [x] Criar lançamento inverso ao cancelar
 - [ ] Exportar .pdf do Balanço Patrimonial
 - [ ] Criar walkthrough
 - [ ] Arrumar layout mobile

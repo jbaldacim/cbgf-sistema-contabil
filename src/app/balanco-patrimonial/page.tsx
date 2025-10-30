@@ -199,8 +199,6 @@ export default function BalancoPatrimonial() {
               </div>
             </div>
 
-            
-
             <DateRangePicker
               date={dateRange}
               setDate={setDateRange}
@@ -212,7 +210,7 @@ export default function BalancoPatrimonial() {
 
       <div className="mx-auto max-w-7xl px-6 py-8">
         {isLoading ? (
-          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-xl border shadow-sm">
+          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-md border shadow-sm">
             <div className="text-muted-foreground flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin" />
               <p className="text-sm font-medium">
@@ -221,14 +219,14 @@ export default function BalancoPatrimonial() {
             </div>
           </div>
         ) : !balanceSheet ? (
-          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-xl border shadow-sm">
+          <div className="bg-card border-border flex min-h-[400px] items-center justify-center rounded-md border shadow-sm">
             <p className="text-muted-foreground">
               Selecione um período para visualizar o balanço
             </p>
           </div>
         ) : (
           <>
-            <div className="bg-primary/10 border-primary/20 mb-6 rounded-lg border p-4 text-center">
+            <div className="bg-primary/10 border-primary/20 mb-6 rounded-md border p-4 text-center">
               <p className="text-muted-foreground text-lg font-medium">
                 Posição de{" "}
                 <span className="text-foreground font-semibold">
@@ -255,7 +253,7 @@ export default function BalancoPatrimonial() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               {/* ATIVO */}
-              <div className="bg-card border-border rounded-xl border p-6 shadow-sm transition-shadow hover:shadow-md">
+              <div className="bg-card border-border rounded-md border p-6 shadow-sm transition-shadow hover:shadow-md">
                 <SectionTitle>ATIVO</SectionTitle>
 
                 <SubsectionTitle>Circulante</SubsectionTitle>
@@ -345,7 +343,7 @@ export default function BalancoPatrimonial() {
               </div>
 
               {/* PASSIVO + PL */}
-              <div className="bg-card border-border rounded-xl border p-6 shadow-sm transition-shadow hover:shadow-md">
+              <div className="bg-card border-border rounded-md border p-6 shadow-sm transition-shadow hover:shadow-md">
                 <SectionTitle>PASSIVO</SectionTitle>
 
                 <SubsectionTitle>Circulante</SubsectionTitle>
@@ -391,7 +389,7 @@ export default function BalancoPatrimonial() {
                   bold
                 />
 
-                <div className="bg-primary/5 border-primary/20 mt-4 rounded-lg border p-4">
+                <div className="bg-primary/5 border-primary/20 mt-4 rounded-md border p-4">
                   <TotalLine
                     label="Total Passivo + PL"
                     value={

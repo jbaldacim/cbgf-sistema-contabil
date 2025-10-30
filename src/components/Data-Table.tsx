@@ -105,7 +105,7 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      <div className="bg-card overflow-hidden rounded-xl border shadow-lg">
+      <div className="bg-card overflow-hidden rounded-md border shadow-lg">
         <div className="overflow-x-auto">
           <Table className="min-w-full table-fixed">
             <TableHeader>

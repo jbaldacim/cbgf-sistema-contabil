@@ -25,7 +25,7 @@ export type Entry = {
 };
 
 export const getColumns = (
-  deleteHandler: (transactionNumber: number) => void,
+  reverseHandler: (transactionNumber: number) => void,
 ): ColumnDef<Entry>[] => [
   {
     accessorKey: "date",
@@ -126,10 +126,10 @@ export const getColumns = (
               </DropdownMenuLabel>
               <DropdownMenuItem
                 className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
-                onClick={() => deleteHandler(transactionNumber)}
+                onClick={() => reverseHandler(transactionNumber)}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Deletar transação
+                <Trash2 className="text-destructive mr-2 h-4 w-4" />
+                Estornar transação
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

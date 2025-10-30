@@ -6,6 +6,7 @@ import { DataTable } from "@/components/Data-Table";
 import { DeleteTransactionModal } from "@/components/DeleteTransactionModal";
 import { BookOpen, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import type { User } from "@supabase/supabase-js"; // Importe o tipo User
 
 export default function LivroDiario() {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -14,6 +15,7 @@ export default function LivroDiario() {
   const [selectedTransaction, setSelectedTransaction] = useState<number | null>(
     null,
   );
+  const [user, setUser] = useState<User | null>(null); // Estado para guardar o usuário
 
   async function fetchEntries() {
     setIsLoading(true);
@@ -28,7 +30,15 @@ export default function LivroDiario() {
   }
 
   useEffect(() => {
-    fetchEntries();
+    // Busca o usuário logado ao carregar a página
+    const fetchUserAndEntries = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      await fetchEntries();
+    };
+    fetchUserAndEntries();
   }, []);
 
   const handleOpenDeleteModal = (transactionNumber: number) => {
@@ -43,16 +53,17 @@ export default function LivroDiario() {
 
   // --- FUNÇÃO MODIFICADA ---
   // Recriada sem usar toast.promise
-  const handleDeleteTransaction = async () => {
+  const handleReverseTransaction = async () => {
     if (selectedTransaction === null) return;
 
     // 1. Mostra um toast de carregamento e guarda seu ID
-    const toastId = toast.loading("Deletando transação...");
+    const toastId = toast.loading("Estornando transação...");
 
     try {
       // 2. Tenta executar a operação no banco de dados
-      const { error } = await supabase.rpc("delete_transaction", {
+      const { error } = await supabase.rpc("reverse_transaction", {
         p_transaction_number: selectedTransaction,
+        p_user_id: user!.id,
       });
 
       // Se a operação no banco retornar um erro, lança-o para o bloco catch
@@ -61,16 +72,19 @@ export default function LivroDiario() {
       }
 
       // 3. Se for bem-sucedido, atualiza o toast para sucesso
-      toast.success(`Transação #${selectedTransaction} deletada com sucesso!`, {
-        id: toastId,
-      });
+      toast.success(
+        `Transação #${selectedTransaction} estornada com sucesso!`,
+        {
+          id: toastId,
+        },
+      );
 
       handleCloseModal();
       fetchEntries(); // Recarrega os dados
     } catch (error) {
       // 4. Se qualquer erro ocorrer, atualiza o toast para erro
-      console.error("Erro ao deletar transação:", error);
-      toast.error("Falha ao deletar a transação.", {
+      console.error("Erro ao estornar transação:", error);
+      toast.error("Falha ao estornar a transação.", {
         id: toastId,
       });
     }
@@ -105,7 +119,7 @@ export default function LivroDiario() {
       <DeleteTransactionModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onConfirm={handleDeleteTransaction}
+        onConfirm={handleReverseTransaction}
         transactionNumber={selectedTransaction}
       />
     </>

@@ -28,7 +28,7 @@ export function DeleteTransactionModal({
   transactionNumber,
 }: DeleteTransactionModalProps) {
   const [confirmationText, setConfirmationText] = useState("");
-  const isConfirmEnabled = confirmationText === "excluir";
+  const isConfirmEnabled = confirmationText === "estornar";
 
   const handleConfirm = () => {
     if (isConfirmEnabled) {
@@ -50,10 +50,10 @@ export function DeleteTransactionModal({
             <Trash2 className="text-destructive h-6 w-6" />
           </div>
           <DialogTitle className="text-center text-xl">
-            Confirmar Exclusão
+            Confirmar Estorno
           </DialogTitle>
           <DialogDescription className="text-center text-base">
-            Você tem certeza que deseja excluir a transação número{" "}
+            Você tem certeza que deseja estornar a transação número{" "}
             <span className="text-foreground font-semibold">
               {transactionNumber}
             </span>
@@ -75,7 +75,7 @@ export function DeleteTransactionModal({
               >
                 Para confirmar, digite{" "}
                 <code className="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-sm font-semibold">
-                  excluir
+                  estornar
                 </code>{" "}
                 abaixo:
               </Label>
@@ -84,14 +84,14 @@ export function DeleteTransactionModal({
               id="confirm-delete"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder="excluir"
+              placeholder="estornar"
               autoComplete="off"
               className="font-mono"
-              aria-label="Digite 'excluir' para confirmar"
+              aria-label="Digite 'estornar' para confirmar"
             />
             {confirmationText && !isConfirmEnabled && (
               <p className="text-destructive mt-2 text-xs">
-                O texto não corresponde. Digite exatamente &quot;excluir&quot;.
+                O texto não corresponde. Digite exatamente &quot;estornar&quot;.
               </p>
             )}
             {isConfirmEnabled && (
@@ -117,7 +117,7 @@ export function DeleteTransactionModal({
             className="flex-1 sm:flex-1"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Deletar Transação
+            Estornar Transação
           </Button>
         </DialogFooter>
       </DialogContent>
